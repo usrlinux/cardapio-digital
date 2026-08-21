@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cardápio Online</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 pb-28">
+
+  <!-- Header -->
+  <header class="bg-red-600 text-white p-4 text-center sticky top-0 z-10 shadow-md">
+    <h1 class="text-xl font-bold">Lanchonete Express</h1>
+    <p class="text-xs text-red-100">Faça seu pedido online sem taxas</p>
+  </header>
+
+  <!-- Lista de Produtos -->
+  <main class="max-w-md mx-auto p-4" id="catalogo">
+    <p class="text-center text-gray-500 mt-8">Carregando cardápio...</p>
+  </main>
+
+  <!-- Barra Fixa de Finalização (Carrinho) -->
+  <div id="footer-carrinho" class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 shadow-lg flex justify-between items-center max-w-md mx-auto hidden">
+    <div>
+      <span class="text-xs text-gray-500 block">Total:</span>
+      <span class="text-lg font-bold text-gray-900" id="total-carrinho">R$ 0,00</span>
+    </div>
+    <button onclick="abrirCheckout()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-lg shadow">
+      Pedir pelo WhatsApp
+    </button>
+  </div>
+
+  <script>
+    // URL da Web App gerada no Google Apps Script
+    const API_URL = "https://script.google.com/macros/s/AKfycbwiv1CzceVgKL3JOejjkHuwzhrChM9ZSkgKXU8Ee8axsBU9U0K53f7dzBLDfZPEuwU/exec";
+    const WHATSAPP_LOJA = "5511999999999"; // Formato: 55 + DDD + Número
+
+    let produtos = [];
+    let carrinho = [];
+
+    // Carregar produtos da planilha
+    async function carregarProdutos() {
+      try {
+        const res = await fetch(API_URL);
+        produtos = await res.json();
+        renderizarCardapio();
+      } catch (err) {
+        document.getElementById('catalogo').innerHTML = '<p class="text-red-500 text-center">Erro ao carregar cardápio.</p>';
+      }
+    }
+
+    function renderizarCardapio() {
+      const container = document.getElementById('catalogo');
+      container.innerHTML = produtos.map(p => `
+        <div class="bg-white rounded-xl shadow p-3 mb-3 flex gap-3 items-center">
+          <img src="${p.imagem || 'https://placehold.co/100'}" class="w-20 h-20 object-cover rounded-lg">
+          <div class="flex-1">
+            <h3 class="font-bold text-gray-800 text-sm">${p.nome}</h3>
+            <p class="text-xs text-gray-500 line-clamp-2">${p.descricao}</p>
+            <span class="text-green-700 font-bold text-sm block mt-1">R$ ${Number(p.preco).toFixed(2)}</span>
+          </div>
+          <button onclick="adicionarAoCarrinho(${p.id})" class="bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-bold shadow active:scale-95">
+            +
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function adicionarAoCarrinho(id) {
+      const prod = produtos.find(p => p.id == id);
+      carrinho.push(prod);
+      atualizarBarra();
+    }
+
+    function atualizarBarra() {
+      const total = carrinho.reduce((acc, item) => acc + Number(item.preco), 0);
+      document.getElementById('total-carrinho').innerText = `R$ ${total.toFixed(2)}`;
+      
+      const footer = document.getElementById('footer-carrinho');
+      if (carrinho.length > 0) {
+        footer.classList.remove('hidden');
+      } else {
+        footer.classList.add('hidden');
+      }
+    }
+
+    async function abrirCheckout() {
+      const nome = prompt("Informe seu nome:");
+      if (!nome) return;
+      
+      const endereco = prompt("Informe seu endereço completo de entrega:");
+      if (!endereco) return;
+
+      const pagamento = prompt("Forma de pagamento (Pix, Dinheiro, Cartão):");
+      if (!pagamento) return;
+
+      // Agrupa itens para o texto
+      const resumo = {};
+      let total = 0;
+      carrinho.forEach(item => {
+        resumo[item.nome] = (resumo[item.nome] || 0) + 1;
+        total += Number(item.preco);
+      });
+
+      const itensFormatados = Object.entries(resumo)
+        .map(([nome, qtd]) => `• ${qtd}x ${nome}`)
+        .join('\n');
+
+      // 1. Grava no Google Sheets em segundo plano
+      fetch(API_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cliente: nome,
+          itens: itensFormatados,
+          total: `R$ ${total.toFixed(2)}`,
+          endereco: endereco,
+          pagamento: pagamento
+        })
+      });
+
+      // 2. Monta mensagem e redireciona para o WhatsApp
+      const texto = encodeURIComponent(
+        `*NOVO PEDIDO*\n` +
+        `-----------------------\n` +
+        `*Cliente:* ${nome}\n` +
+        `*Endereço:* ${endereco}\n` +
+        `*Pagamento:* ${pagamento}\n\n` +
+        `*Itens:*\n${itensFormatados}\n\n` +
+        `*Total:* R$ ${total.toFixed(2)}`
+      );
+
+      window.open(`https://wa.me/${WHATSAPP_LOJA}?text=${texto}`, '_blank');
+      
+      // Limpa carrinho após pedido
+      carrinho = [];
+      atualizarBarra();
+    }
+
+    carregarProdutos();
+  </script>
+</body>
+</html>
