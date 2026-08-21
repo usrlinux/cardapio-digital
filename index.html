@@ -25,7 +25,7 @@
       <span class="text-xs text-gray-500 block">Total:</span>
       <span class="text-lg font-bold text-gray-900" id="total-carrinho">R$ 0,00</span>
     </div>
-    <button onclick="abrirCheckout()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-lg shadow">
+    <button id="btn-finalizar" onclick="abrirCheckout()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-lg shadow">
       Pedir pelo WhatsApp
     </button>
   </div>
@@ -33,7 +33,6 @@
   <script>
     // URL da Web App gerada no Google Apps Script
     const API_URL = "https://script.google.com/macros/s/AKfycbwiv1CzceVgKL3JOejjkHuwzhrChM9ZSkgKXU8Ee8axsBU9U0K53f7dzBLDfZPEuwU/exec";
-    const WHATSAPP_LOJA = "5511999999999"; // Formato: 55 + DDD + Número
 
     let produtos = [];
     let carrinho = [];
@@ -94,7 +93,11 @@
       const pagamento = prompt("Forma de pagamento (Pix, Dinheiro, Cartão):");
       if (!pagamento) return;
 
-      // Agrupa itens para o texto
+      const btnFinalizar = document.getElementById('btn-finalizar');
+      btnFinalizar.innerText = "Processando...";
+      btnFinalizar.disabled = true;
+
+      // Agrupa itens do carrinho
       const resumo = {};
       let total = 0;
       carrinho.forEach(item => {
@@ -103,39 +106,41 @@
       });
 
       const itensFormatados = Object.entries(resumo)
-        .map(([nome, qtd]) => `• ${qtd}x ${nome}`)
+        .map(([itemNome, qtd]) => `• ${qtd}x ${itemNome}`)
         .join('\n');
 
-      // 1. Grava no Google Sheets em segundo plano
-      fetch(API_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          cliente: nome,
-          itens: itensFormatados,
-          total: `R$ ${total.toFixed(2)}`,
-          endereco: endereco,
-          pagamento: pagamento
-        })
-      });
+      try {
+        // Envia o pedido para o Apps Script
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            cliente: nome,
+            itens: itensFormatados,
+            total: `R$ ${total.toFixed(2)}`,
+            endereco: endereco,
+            pagamento: pagamento
+          })
+        });
 
-      // 2. Monta mensagem e redireciona para o WhatsApp
-      const texto = encodeURIComponent(
-        `*NOVO PEDIDO*\n` +
-        `-----------------------\n` +
-        `*Cliente:* ${nome}\n` +
-        `*Endereço:* ${endereco}\n` +
-        `*Pagamento:* ${pagamento}\n\n` +
-        `*Itens:*\n${itensFormatados}\n\n` +
-        `*Total:* R$ ${total.toFixed(2)}`
-      );
+        const resposta = await res.json();
 
-      window.open(`https://wa.me/${WHATSAPP_LOJA}?text=${texto}`, '_blank');
-      
-      // Limpa carrinho após pedido
-      carrinho = [];
-      atualizarBarra();
+        if (resposta.status === "sucesso" && resposta.urlWhatsapp) {
+          // Abre o link do WhatsApp enviado pelo Apps Script
+          window.location.href = resposta.urlWhatsapp;
+          
+          carrinho = [];
+          atualizarBarra();
+        } else {
+          alert("Houve um erro ao processar o pedido. Tente novamente.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Erro de conexão ao enviar o pedido.");
+      } finally {
+        btnFinalizar.innerText = "Pedir pelo WhatsApp";
+        btnFinalizar.disabled = false;
+      }
     }
 
     carregarProdutos();
