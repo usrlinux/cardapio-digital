@@ -36,6 +36,8 @@
     let produtos = [];
     // Carrinho em formato de mapa: { [id_produto]: quantidade }
     let carrinho = {};
+    // Armazena as categorias abertas para não resetar ao alterar quantidades
+    const categoriasAbertas = new Set();
 
     async function carregarProdutos() {
       try {
@@ -44,6 +46,14 @@
         renderizarCardapio();
       } catch (err) {
         document.getElementById('catalogo').innerHTML = '<p class="text-red-500 text-center">Erro ao carregar cardápio.</p>';
+      }
+    }
+
+    function toggleCategoria(categoria, estaAberto) {
+      if (estaAberto) {
+        categoriasAbertas.add(categoria);
+      } else {
+        categoriasAbertas.delete(categoria);
       }
     }
 
@@ -60,10 +70,13 @@
 
       let html = '';
 
-      // Renderiza cada grupo de categoria como acordeão (details/summary)
+      // Renderiza cada grupo de categoria como acordeão mantendo o estado de abertura
       for (const [categoria, itens] of Object.entries(categorias)) {
+        const isOpen = categoriasAbertas.has(categoria) ? 'open' : '';
+        const catEscapada = categoria.replace(/'/g, "\\'");
+
         html += `
-          <details open class="group mb-4 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <details ${isOpen} ontoggle="toggleCategoria('${catEscapada}', this.open)" class="group mb-4 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <summary class="flex justify-between items-center p-3.5 font-bold text-gray-800 cursor-pointer select-none bg-gray-50 hover:bg-gray-100 transition-colors list-none">
               <div class="flex items-center gap-2">
                 <span class="w-1.5 h-5 bg-red-600 rounded-full"></span>
