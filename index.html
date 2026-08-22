@@ -132,6 +132,9 @@
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwiv1CzceVgKL3JOejjkHuwzhrChM9ZSkgKXU8Ee8axsBU9U0K53f7dzBLDfZPEuwU/exec";
+    
+    // Armazena o telefone dinamicamente sem expor no GitHub
+    let TELEFONE_EMPRESA = ""; 
 
     let produtos = [];
     let carrinho = {};
@@ -141,7 +144,17 @@
     async function carregarProdutos() {
       try {
         const res = await fetch(API_URL);
-        produtos = await res.json();
+        const data = await res.json();
+        
+        // NOVO: Detecta se o Apps Script retornou a estrutura com produtos + whatsapp
+        if (data.produtos && data.whatsapp) {
+          produtos = data.produtos;
+          TELEFONE_EMPRESA = data.whatsapp.toString().replace(/\D/g, ''); // Limpa caracteres não numéricos
+        } else {
+          // Fallback de compatibilidade caso o Apps Script ainda não tenha sido atualizado
+          produtos = data;
+        }
+
         renderizarCardapio();
       } catch (err) {
         document.getElementById('catalogo').innerHTML = '<p class="text-red-500 text-center">Erro ao carregar cardápio.</p>';
@@ -165,8 +178,8 @@
     function obterItemCarrinho(key) {
       if (key.startsWith("pizza_")) {
         const parts = key.split("_");
-        const id1 = parts[1];
-        const id2 = parts[2];
+        const id1 = parts;
+        const id2 = parts;
         const p1 = produtos.find(p => p.id == id1);
         const p2 = produtos.find(p => p.id == id2);
         
@@ -196,7 +209,7 @@
     function renderizarCardapio() {
       const container = document.getElementById('catalogo');
       
-      const categorias = produtos.reduce((acc, p) => {
+      const categories = produtos.reduce((acc, p) => {
         const cat = p.categoria || "Outros";
         if (!acc[cat]) acc[cat] = [];
         acc[cat].push(p);
@@ -205,7 +218,7 @@
 
       let html = '';
 
-      for (const [categoria, itens] of Object.entries(categorias)) {
+      for (const [categoria, itens] of Object.entries(categories)) {
         const isOpen = categoriasAbertas.has(categoria) ? 'open' : '';
         const catEscapada = categoria.replace(/'/g, "\\'");
 
@@ -337,8 +350,7 @@
         carrinho[key] = (carrinho[key] || 0) + 1;
       } else {
         const saboresOrdenados = [idSabor1, idSabor2].sort((a, b) => Number(a) - Number(b));
-        // Chave do item composto sem vírgulas
-        const key = `pizza_${saboresOrdenados[0]}_${saboresOrdenados[1]}`;
+        const key = `pizza_${saboresOrdenados}_${saboresOrdenados}`;
         carrinho[key] = (carrinho[key] || 0) + 1;
       }
 
@@ -369,7 +381,6 @@
       }
     }
 
-    // NOVO: Recupera e preenche dados salvos do localStorage
     function carregarDadosCliente() {
       const nomeSalvo = localStorage.getItem('cliente_nome');
       const enderecoSalvo = localStorage.getItem('cliente_endereco');
@@ -386,7 +397,6 @@
       }
     }
 
-    // NOVO: Limpa os dados salvos com confirmação
     function limparDadosSalvos() {
       if (confirm("Deseja realmente apagar seus dados de entrega salvos neste aparelho?")) {
         localStorage.removeItem('cliente_nome');
@@ -443,7 +453,6 @@
       container.innerHTML = html;
       document.getElementById('checkout-total').innerText = `R$ ${total.toFixed(2)}`;
       
-      // NOVO: Preenche automaticamente os dados se houver histórico de compra
       carregarDadosCliente();
 
       document.getElementById('modal-checkout').classList.remove('hidden');
@@ -490,18 +499,20 @@
         return;
       }
 
+      // NOVO: Validação extra de segurança para carregar o telefone
+      if (!TELEFONE_EMPRESA) {
+        alert("Houve um atraso na conexão ao carregar o telefone do estabelecimento. Por favor, aguarde 2 segundos e tente novamente.");
+        return;
+      }
+
       const nome = document.getElementById('checkout-nome').value;
       const endereco = document.getElementById('checkout-endereco').value;
       const pagamento = document.getElementById('checkout-pagamento').value;
 
-      // NOVO: Salva os dados localmente no celular para facilitar as próximas compras
+      // Salva os dados localmente no celular do cliente
       localStorage.setItem('cliente_nome', nome);
       localStorage.setItem('cliente_endereco', endereco);
       localStorage.setItem('cliente_pagamento', pagamento);
-
-      const btnEnviar = document.getElementById('btn-enviar-pedido');
-      btnEnviar.innerText = "Processando...";
-      btnEnviar.disabled = true;
 
       let total = 0;
       const linhasItens = [];
@@ -516,39 +527,39 @@
 
       const itensFormatados = linhasItens.join('\n');
 
-      try {
-        const payload = JSON.stringify({
+      // Monta o texto de envio para o WhatsApp
+      const textoMensagem = `*NOVO PEDIDO*\n` +
+                            `-----------------------\n` +
+                            `*Cliente:* ${nome}\n` +
+                            `*Endereço:* ${endereco}\n` +
+                            `*Pagamento:* ${pagamento}\n\n` +
+                            `*Itens:*\n${itensFormatados}\n\n` +
+                            `*Total:* R$ ${total.toFixed(2)}`;
+
+      const urlWhatsapp = `https://api.whatsapp.com/send?phone=${TELEFONE_EMPRESA}&text=${encodeURIComponent(textoMensagem)}`;
+
+      // Redireciona o cliente instantaneamente para o WhatsApp
+      window.location.href = urlWhatsapp;
+
+      // Envia os dados silenciosamente para o Google Sheets em segundo plano
+      fetch(API_URL, {
+        method: "POST",
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
           cliente: nome,
           itens: itensFormatados,
           total: `R$ ${total.toFixed(2)}`,
           endereco: endereco,
           pagamento: pagamento
-        });
+        }),
+        keepalive: true
+      }).catch(err => console.error("Erro ao registrar pedido na planilha em segundo plano:", err));
 
-        const res = await fetch(API_URL, {
-          method: "POST",
-          redirect: "follow",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: payload
-        });
-
-        const resposta = await res.json();
-
-        if (resposta && resposta.urlWhatsapp) {
-          window.location.href = resposta.urlWhatsapp;
-          carrinho = {};
-          fecharCheckout();
-          renderizarCardapio();
-        } else {
-          alert("Houve um erro ao processar o pedido. Tente novamente.");
-        }
-      } catch (err) {
-        console.error("Erro na requisição:", err);
-        alert("Erro de conexão ao enviar o pedido.");
-      } finally {
-        btnEnviar.innerText = "Pedir pelo WhatsApp";
-        btnEnviar.disabled = false;
-      }
+      // Limpa as variáveis locais de carrinho e fecha janelas de checkout
+      carrinho = {};
+      fecharCheckout();
+      renderizarCardapio();
     }
 
     carregarProdutos();
