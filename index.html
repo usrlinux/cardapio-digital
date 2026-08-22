@@ -39,37 +39,24 @@
     </button>
   </div>
 
-  <!-- Modal de Customização de Pizza -->
+  <!-- Modal de Montagem de Pizza Meio a Meio -->
   <div id="modal-pizza" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl relative animate-fade-in">
-      <h3 class="text-lg font-bold text-gray-900 mb-4" id="modal-pizza-title">Adicionar Pizza</h3>
+      <h3 class="text-lg font-bold text-gray-900 mb-4" id="modal-pizza-title">Montar Pizza Meio a Meio</h3>
       
       <div class="space-y-4">
-        <!-- Tipo de Pizza -->
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Opção de Pizza</label>
-          <div class="grid grid-cols-2 gap-2">
-            <button id="btn-sabor-unico" onclick="selecionarTipoPizza('unico')" class="py-2.5 px-3 border-2 border-red-600 bg-red-50 text-red-600 font-bold rounded-xl text-sm transition-all">
-              Sabor Único
-            </button>
-            <button id="btn-sabor-duplo" onclick="selecionarTipoPizza('duplo')" class="py-2.5 px-3 border-2 border-gray-200 text-gray-600 font-bold rounded-xl text-sm transition-all">
-              Meio a Meio (2 Sabores)
-            </button>
-          </div>
-        </div>
-
         <!-- Sabor 1 -->
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1" id="label-sabor1">Sabor Selecionado</label>
-          <select id="select-sabor1" class="w-full bg-gray-100 border border-gray-200 p-2.5 rounded-xl text-sm font-semibold text-gray-800 cursor-not-allowed" disabled>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Primeiro Sabor (1/2)</label>
+          <select id="select-sabor1" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none focus:border-red-500 font-semibold text-gray-800">
             <!-- Preenchido dinamicamente -->
           </select>
         </div>
 
-        <!-- Sabor 2 (Oculto por padrão) -->
-        <div id="container-sabor2" class="hidden">
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Segundo Sabor</label>
-          <select id="select-sabor2" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none focus:border-red-500 font-medium">
+        <!-- Sabor 2 -->
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Segundo Sabor (1/2)</label>
+          <select id="select-sabor2" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none focus:border-red-500 font-semibold text-gray-800">
             <!-- Preenchido dinamicamente -->
           </select>
         </div>
@@ -77,7 +64,7 @@
 
       <!-- Rodapé do Modal -->
       <div class="mt-6 flex gap-3">
-        <button onclick="fecharModalPizza()" class="flex-1 bg-gray-100 hover:bg-200 text-gray-700 font-bold py-2.5 rounded-xl text-sm transition-all">
+        <button onclick="fecharModalPizza()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-xl text-sm transition-all">
           Cancelar
         </button>
         <button onclick="confirmarAdicionarPizza()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-sm transition-all">
@@ -92,7 +79,7 @@
     <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl relative my-8 animate-fade-in">
       <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Resumo do Pedido</h3>
       
-      <!-- Itens do Carrinho com Controles para Ajustar diretamente -->
+      <!-- Itens do Carrinho -->
       <div id="checkout-itens" class="space-y-3 max-h-48 overflow-y-auto mb-4 border-b pb-4">
         <!-- Inserido dinamicamente -->
       </div>
@@ -142,14 +129,9 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbwiv1CzceVgKL3JOejjkHuwzhrChM9ZSkgKXU8Ee8axsBU9U0K53f7dzBLDfZPEuwU/exec";
 
     let produtos = [];
-    // Carrinho em formato de mapa: suporta chaves simples (id) e compostas (pizza_id1_id2)
     let carrinho = {};
-    // Armazena as categorias abertas para não resetar ao alterar quantidades
     const categoriasAbertas = new Set();
-
-    // Estado local para controle de pizzas customizadas
     let pizzaSelecionadaId = null;
-    let tipoPizzaSelecionada = 'unico'; // 'unico' ou 'duplo'
 
     async function carregarProdutos() {
       try {
@@ -169,14 +151,12 @@
       }
     }
 
-    // Helper para verificar se um produto pertence à categoria Pizza
     function isPizza(p) {
       if (!p || !p.categoria) return false;
       const cat = p.categoria.trim().toLowerCase();
       return cat === "pizza" || cat === "pizzas";
     }
 
-    // Helper para resolver uma chave do carrinho (comum ou de 2 sabores) em um objeto formatado
     function obterItemCarrinho(key) {
       if (key.startsWith("pizza_")) {
         const parts = key.split("_");
@@ -184,12 +164,15 @@
         const id2 = parts[2];
         const p1 = produtos.find(p => p.id == id1);
         const p2 = produtos.find(p => p.id == id2);
+        
         if (p1 && p2) {
-          // Regra de precificação adotada: Pelo valor da mais cara
           const preco = Math.max(Number(p1.preco), Number(p2.preco));
+          // Remove a palavra "Pizza " do início do nome dos sabores para encurtar
+          const nome1 = p1.nome.replace(/^[Pp]izza\s+/, "");
+          const nome2 = p2.nome.replace(/^[Pp]izza\s+/, "");
           return {
             key,
-            nome: `Pizza 1/2 ${p1.nome} / 1/2 ${p2.nome}`,
+            nome: `Pizza 1/2 ${nome1} / 1/2 ${nome2}`,
             preco: preco
           };
         }
@@ -209,7 +192,6 @@
     function renderizarCardapio() {
       const container = document.getElementById('catalogo');
       
-      // Agrupa os produtos pela coluna "categoria"
       const categorias = produtos.reduce((acc, p) => {
         const cat = p.categoria || "Outros";
         if (!acc[cat]) acc[cat] = [];
@@ -219,7 +201,6 @@
 
       let html = '';
 
-      // Renderiza cada grupo de categoria como acordeão mantendo o estado de abertura
       for (const [categoria, itens] of Object.entries(categorias)) {
         const isOpen = categoriasAbertas.has(categoria) ? 'open' : '';
         const catEscapada = categoria.replace(/'/g, "\\'");
@@ -240,6 +221,7 @@
             <div class="p-3 space-y-3 border-t border-gray-100">
               ${itens.map(p => {
                 const qtd = carrinho[p.id] || 0;
+                const ePizza = isPizza(p);
                 return `
                   <div class="bg-white rounded-xl border border-gray-100 p-3 flex gap-3 items-center hover:border-gray-300 transition-colors">
                     <img src="${p.imagem || 'https://placehold.co/100'}" class="w-20 h-20 object-cover rounded-lg bg-gray-50 flex-shrink-0">
@@ -249,17 +231,26 @@
                       <span class="text-green-700 font-bold text-sm block mt-1">R$ ${Number(p.preco).toFixed(2)}</span>
                     </div>
                     
-                    <!-- Controles de Quantidade (+ / -) -->
-                    <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-lg border border-gray-200 flex-shrink-0">
-                      ${qtd > 0 ? `
-                        <button onclick="alterarQtd(${p.id}, -1)" class="w-7 h-7 bg-red-100 text-red-600 rounded-md font-bold text-sm flex items-center justify-center active:scale-90 transition-transform">
-                          -
+                    <div class="flex flex-col items-end gap-2 flex-shrink-0">
+                      <!-- Controles de Quantidade (Sabor Único) -->
+                      <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-lg border border-gray-200">
+                        ${qtd > 0 ? `
+                          <button onclick="alterarQtd(${p.id}, -1)" class="w-7 h-7 bg-red-100 text-red-600 rounded-md font-bold text-sm flex items-center justify-center active:scale-90 transition-transform">
+                            -
+                          </button>
+                          <span class="text-xs font-bold text-gray-800 w-4 text-center">${qtd}</span>
+                        ` : ''}
+                        <button onclick="alterarQtd(${p.id}, 1)" class="w-7 h-7 bg-red-600 text-white rounded-md font-bold text-sm flex items-center justify-center active:scale-90 transition-transform">
+                          +
                         </button>
-                        <span class="text-xs font-bold text-gray-800 w-4 text-center">${qtd}</span>
+                      </div>
+                      
+                      <!-- Botão Meio a Meio (Aparece apenas nas pizzas) -->
+                      ${ePizza ? `
+                        <button onclick="abrirModalPizza(${p.id})" class="text-[11px] bg-amber-500 hover:bg-amber-600 text-white font-extrabold py-1 px-2.5 rounded-lg shadow-sm active:scale-95 transition-all">
+                          Meio a Meio
+                        </button>
                       ` : ''}
-                      <button onclick="alterarQtd(${p.id}, 1)" class="w-7 h-7 bg-red-600 text-white rounded-md font-bold text-sm flex items-center justify-center active:scale-90 transition-transform">
-                        +
-                      </button>
                     </div>
                   </div>
                 `;
@@ -278,12 +269,6 @@
       const prod = produtos.find(p => p.id == id);
       if (!prod) return;
 
-      // Se for pizza e for um acréscimo (+), abrimos o modal de personalização
-      if (isPizza(prod) && delta > 0) {
-        abrirModalPizza(id);
-        return;
-      }
-
       const atual = carrinho[key] || 0;
       const novaQtd = atual + delta;
 
@@ -299,85 +284,59 @@
     /* SISTEMA DE PIZZA MEIO A MEIO (MODAL) */
     function abrirModalPizza(id) {
       pizzaSelecionadaId = id;
-      tipoPizzaSelecionada = 'unico';
       
       const prod = produtos.find(p => p.id == id);
       if (!prod) return;
 
-      document.getElementById('modal-pizza-title').innerText = `Adicionar Pizza: ${prod.nome}`;
-      
-      // Sabor 1 é fixo com base na pizza clicada
-      const select1 = document.getElementById('select-sabor1');
-      select1.innerHTML = `<option value="${prod.id}" selected>${prod.nome} - R$ ${Number(prod.preco).toFixed(2)}</option>`;
-      
-      // Popula Sabor 2 com todas as outras pizzas disponíveis no catálogo
-      const select2 = document.getElementById('select-sabor2');
       const pizzasDisponiveis = produtos.filter(p => isPizza(p));
       
+      const select1 = document.getElementById('select-sabor1');
+      select1.innerHTML = pizzasDisponiveis.map(p => `
+        <option value="${p.id}" ${p.id == id ? 'selected' : ''}>${p.nome} - R$ ${Number(p.preco).toFixed(2)}</option>
+      `).join('');
+      
+      const select2 = document.getElementById('select-sabor2');
       select2.innerHTML = pizzasDisponiveis.map(p => `
         <option value="${p.id}">${p.nome} - R$ ${Number(p.preco).toFixed(2)}</option>
       `).join('');
 
-      // Restaura o layout para Sabor Único por padrão
-      selecionarTipoPizza('unico');
-      
       document.getElementById('modal-pizza').classList.remove('hidden');
+      atualizarPrecoModal();
     }
 
     function fecharModalPizza() {
       document.getElementById('modal-pizza').classList.add('hidden');
     }
 
-    function selecionarTipoPizza(tipo) {
-      tipoPizzaSelecionada = tipo;
-      
-      const btnUnico = document.getElementById('btn-sabor-unico');
-      const btnDuplo = document.getElementById('btn-sabor-duplo');
-      const containerSabor2 = document.getElementById('container-sabor2');
-
-      if (tipo === 'unico') {
-        btnUnico.className = "py-2.5 px-3 border-2 border-red-600 bg-red-50 text-red-600 font-bold rounded-xl text-sm transition-all";
-        btnDuplo.className = "py-2.5 px-3 border-2 border-gray-200 text-gray-600 font-bold rounded-xl text-sm transition-all";
-        containerSabor2.classList.add('hidden');
-      } else {
-        btnUnico.className = "py-2.5 px-3 border-2 border-gray-200 text-gray-600 font-bold rounded-xl text-sm transition-all";
-        btnDuplo.className = "py-2.5 px-3 border-2 border-red-600 bg-red-50 text-red-600 font-bold rounded-xl text-sm transition-all";
-        containerSabor2.classList.remove('hidden');
-      }
-      
-      atualizarPrecoModal();
-    }
-
     function atualizarPrecoModal() {
-      const prod1 = produtos.find(p => p.id == pizzaSelecionadaId);
-      if (!prod1) return;
-
-      let precoFinal = Number(prod1.preco);
-
-      if (tipoPizzaSelecionada === 'duplo') {
-        const idSabor2 = document.getElementById('select-sabor2').value;
-        const prod2 = produtos.find(p => p.id == idSabor2);
-        if (prod2) {
-          // Regra de precificação: o preço da pizza será o maior valor entre os dois sabores escolhidos
-          precoFinal = Math.max(Number(prod1.preco), Number(prod2.preco));
-        }
+      const idSabor1 = document.getElementById('select-sabor1').value;
+      const idSabor2 = document.getElementById('select-sabor2').value;
+      
+      const prod1 = produtos.find(p => p.id == idSabor1);
+      const prod2 = produtos.find(p => p.id == idSabor2);
+      
+      if (prod1 && prod2) {
+        // Regra da mais cara
+        const precoFinal = Math.max(Number(prod1.preco), Number(prod2.preco));
+        document.getElementById('modal-pizza-preco').innerText = precoFinal.toFixed(2);
       }
-
-      document.getElementById('modal-pizza-preco').innerText = precoFinal.toFixed(2);
     }
 
-    // Atualiza o preço automaticamente quando o segundo sabor mudar
+    document.getElementById('select-sabor1').addEventListener('change', atualizarPrecoModal);
     document.getElementById('select-sabor2').addEventListener('change', atualizarPrecoModal);
 
     function confirmarAdicionarPizza() {
-      if (tipoPizzaSelecionada === 'unico') {
-        const key = pizzaSelecionadaId.toString();
+      const idSabor1 = document.getElementById('select-sabor1').value;
+      const idSabor2 = document.getElementById('select-sabor2').value;
+      
+      if (idSabor1 === idSabor2) {
+        // Se selecionou os mesmos sabores, vira Sabor Único automaticamente
+        const key = idSabor1.toString();
         carrinho[key] = (carrinho[key] || 0) + 1;
       } else {
-        const idSabor2 = document.getElementById('select-sabor2').value;
-        // Ordena os IDs para evitar chaves duplicadas para as mesmas seleções (ex: pizza_3_5 e pizza_5_3)
-        const saboresOrdenados = [pizzaSelecionadaId, idSabor2].sort((a, b) => Number(a) - Number(b));
-        const key = `pizza_${saboresOrdenados}_${saboresOrdenados[1]}`;
+        // Ordena os IDs para evitar chaves duplicadas (ex: pizza_1_2 e pizza_2_1)
+        const saboresOrdenados = [idSabor1, idSabor2].sort((a, b) => Number(a) - Number(b));
+        const key = `pizza_${saboresOrdenados[0]}_${saboresOrdenados[1]}`;
         carrinho[key] = (carrinho[key] || 0) + 1;
       }
 
@@ -424,7 +383,7 @@
       }
 
       if (itensValidos.length === 0) {
-        alert("Seu carrinho está vazio!");
+        fecharCheckout();
         return;
       }
 
@@ -465,8 +424,11 @@
 
       renderizarCardapio();
       
-      // Se o carrinho esvaziar, fecha o checkout automaticamente
-      let totalItens = Object.values(carrinho).reduce((acc, q) => acc + q, 0);
+      let totalItens = 0;
+      for (const [k, q] of Object.entries(carrinho)) {
+        if (obterItemCarrinho(k)) totalItens += q;
+      }
+
       if (totalItens === 0) {
         fecharCheckout();
       } else {
@@ -481,6 +443,17 @@
     async function enviarPedido(event) {
       event.preventDefault();
 
+      // Trava de segurança extra
+      let totalItens = 0;
+      for (const [k, q] of Object.entries(carrinho)) {
+        if (obterItemCarrinho(k)) totalItens += q;
+      }
+      if (totalItens === 0) {
+        alert("Seu carrinho está vazio!");
+        fecharCheckout();
+        return;
+      }
+
       const nome = document.getElementById('checkout-nome').value;
       const endereco = document.getElementById('checkout-endereco').value;
       const pagamento = document.getElementById('checkout-pagamento').value;
@@ -489,7 +462,6 @@
       btnEnviar.innerText = "Processando...";
       btnEnviar.disabled = true;
 
-      // Monta a formatação dos itens para envio
       let total = 0;
       const linhasItens = [];
 
