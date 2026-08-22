@@ -121,6 +121,11 @@
             </button>
           </div>
         </div>
+
+        <!-- Opção de Privacidade / Limpeza de Dados -->
+        <button type="button" onclick="limparDadosSalvos()" class="text-[10px] text-gray-400 hover:text-red-500 transition-colors text-center block w-full pt-2">
+          Limpar meus dados salvos neste celular
+        </button>
       </form>
     </div>
   </div>
@@ -167,7 +172,6 @@
         
         if (p1 && p2) {
           const preco = Math.max(Number(p1.preco), Number(p2.preco));
-          // Remove a palavra "Pizza " do início do nome dos sabores para encurtar
           const nome1 = p1.nome.replace(/^[Pp]izza\s+/, "");
           const nome2 = p2.nome.replace(/^[Pp]izza\s+/, "");
           return {
@@ -316,7 +320,6 @@
       const prod2 = produtos.find(p => p.id == idSabor2);
       
       if (prod1 && prod2) {
-        // Regra da mais cara
         const precoFinal = Math.max(Number(prod1.preco), Number(prod2.preco));
         document.getElementById('modal-pizza-preco').innerText = precoFinal.toFixed(2);
       }
@@ -330,12 +333,11 @@
       const idSabor2 = document.getElementById('select-sabor2').value;
       
       if (idSabor1 === idSabor2) {
-        // Se selecionou os mesmos sabores, vira Sabor Único automaticamente
         const key = idSabor1.toString();
         carrinho[key] = (carrinho[key] || 0) + 1;
       } else {
-        // Ordena os IDs para evitar chaves duplicadas (ex: pizza_1_2 e pizza_2_1)
         const saboresOrdenados = [idSabor1, idSabor2].sort((a, b) => Number(a) - Number(b));
+        // Chave do item composto sem vírgulas
         const key = `pizza_${saboresOrdenados[0]}_${saboresOrdenados[1]}`;
         carrinho[key] = (carrinho[key] || 0) + 1;
       }
@@ -367,6 +369,38 @@
       }
     }
 
+    // NOVO: Recupera e preenche dados salvos do localStorage
+    function carregarDadosCliente() {
+      const nomeSalvo = localStorage.getItem('cliente_nome');
+      const enderecoSalvo = localStorage.getItem('cliente_endereco');
+      const pagamentoSalvo = localStorage.getItem('cliente_pagamento');
+
+      if (nomeSalvo) {
+        document.getElementById('checkout-nome').value = nomeSalvo;
+      }
+      if (enderecoSalvo) {
+        document.getElementById('checkout-endereco').value = enderecoSalvo;
+      }
+      if (pagamentoSalvo) {
+        document.getElementById('checkout-pagamento').value = pagamentoSalvo;
+      }
+    }
+
+    // NOVO: Limpa os dados salvos com confirmação
+    function limparDadosSalvos() {
+      if (confirm("Deseja realmente apagar seus dados de entrega salvos neste aparelho?")) {
+        localStorage.removeItem('cliente_nome');
+        localStorage.removeItem('cliente_endereco');
+        localStorage.removeItem('cliente_pagamento');
+        
+        document.getElementById('checkout-nome').value = '';
+        document.getElementById('checkout-endereco').value = '';
+        document.getElementById('checkout-pagamento').selectedIndex = 0;
+        
+        alert("Dados limpos com sucesso!");
+      }
+    }
+
     function abrirCheckout() {
       const container = document.getElementById('checkout-itens');
       let total = 0;
@@ -394,7 +428,6 @@
             <p class="text-xs text-gray-500">R$ ${item.preco.toFixed(2)} un.</p>
           </div>
           
-          <!-- Controles rápidos direto no Checkout -->
           <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-lg border border-gray-200 flex-shrink-0">
             <button type="button" onclick="alterarQtdCarrinho('${item.key}', -1)" class="w-6 h-6 bg-red-100 text-red-600 rounded-md font-bold text-xs flex items-center justify-center active:scale-90 transition-transform">
               -
@@ -409,6 +442,10 @@
 
       container.innerHTML = html;
       document.getElementById('checkout-total').innerText = `R$ ${total.toFixed(2)}`;
+      
+      // NOVO: Preenche automaticamente os dados se houver histórico de compra
+      carregarDadosCliente();
+
       document.getElementById('modal-checkout').classList.remove('hidden');
     }
 
@@ -443,7 +480,6 @@
     async function enviarPedido(event) {
       event.preventDefault();
 
-      // Trava de segurança extra
       let totalItens = 0;
       for (const [k, q] of Object.entries(carrinho)) {
         if (obterItemCarrinho(k)) totalItens += q;
@@ -457,6 +493,11 @@
       const nome = document.getElementById('checkout-nome').value;
       const endereco = document.getElementById('checkout-endereco').value;
       const pagamento = document.getElementById('checkout-pagamento').value;
+
+      // NOVO: Salva os dados localmente no celular para facilitar as próximas compras
+      localStorage.setItem('cliente_nome', nome);
+      localStorage.setItem('cliente_endereco', endereco);
+      localStorage.setItem('cliente_pagamento', pagamento);
 
       const btnEnviar = document.getElementById('btn-enviar-pedido');
       btnEnviar.innerText = "Processando...";
