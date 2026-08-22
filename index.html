@@ -6,38 +6,37 @@
   <title>Cardápio Online</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 pb-28">
+<body class="bg-gray-100 pb-32">
 
   <!-- Header -->
-  <header class="bg-red-600 text-white p-4 text-center sticky top-0 z-10 shadow-md">
+  <header class="bg-red-600 text-white p-4 text-center sticky top-0 z-20 shadow-md">
     <h1 class="text-xl font-bold">Lanchonete Express</h1>
     <p class="text-xs text-red-100">Faça seu pedido online sem taxas</p>
   </header>
 
-  <!-- Lista de Produtos -->
+  <!-- Lista de Produtos agrupados por Categoria -->
   <main class="max-w-md mx-auto p-4" id="catalogo">
     <p class="text-center text-gray-500 mt-8">Carregando cardápio...</p>
   </main>
 
   <!-- Barra Fixa de Finalização (Carrinho) -->
-  <div id="footer-carrinho" class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 shadow-lg flex justify-between items-center max-w-md mx-auto hidden">
+  <div id="footer-carrinho" class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 shadow-2xl flex justify-between items-center max-w-md mx-auto hidden z-20">
     <div>
       <span class="text-xs text-gray-500 block">Total:</span>
       <span class="text-lg font-bold text-gray-900" id="total-carrinho">R$ 0,00</span>
     </div>
-    <button id="btn-finalizar" onclick="abrirCheckout()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-5 rounded-lg shadow">
+    <button id="btn-finalizar" onclick="abrirCheckout()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-5 rounded-xl shadow active:scale-95 transition-all">
       Pedir pelo WhatsApp
     </button>
   </div>
 
   <script>
-    // URL da Web App gerada no Google Apps Script
     const API_URL = "https://script.google.com/macros/s/AKfycbwiv1CzceVgKL3JOejjkHuwzhrChM9ZSkgKXU8Ee8axsBU9U0K53f7dzBLDfZPEuwU/exec";
 
     let produtos = [];
-    let carrinho = [];
+    // Carrinho em formato de mapa: { [id_produto]: quantidade }
+    let carrinho = {};
 
-    // Carregar produtos da planilha
     async function carregarProdutos() {
       try {
         const res = await fetch(API_URL);
@@ -50,33 +49,87 @@
 
     function renderizarCardapio() {
       const container = document.getElementById('catalogo');
-      container.innerHTML = produtos.map(p => `
-        <div class="bg-white rounded-xl shadow p-3 mb-3 flex gap-3 items-center">
-          <img src="${p.imagem || 'https://placehold.co/100'}" class="w-20 h-20 object-cover rounded-lg">
-          <div class="flex-1">
-            <h3 class="font-bold text-gray-800 text-sm">${p.nome}</h3>
-            <p class="text-xs text-gray-500 line-clamp-2">${p.descricao}</p>
-            <span class="text-green-700 font-bold text-sm block mt-1">R$ ${Number(p.preco).toFixed(2)}</span>
-          </div>
-          <button onclick="adicionarAoCarrinho(${p.id})" class="bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-bold shadow active:scale-95">
-            +
-          </button>
-        </div>
-      `).join('');
-    }
+      
+      // Agrupa os produtos pela coluna "categoria"
+      const categorias = produtos.reduce((acc, p) => {
+        const cat = p.categoria || "Outros";
+        if (!acc[cat]) acc[cat] = [];
+        acc[cat].push(p);
+        return acc;
+      }, {});
 
-    function adicionarAoCarrinho(id) {
-      const prod = produtos.find(p => p.id == id);
-      carrinho.push(prod);
+      let html = '';
+
+      // Renderiza cada grupo de categoria
+      for (const [categoria, itens] of Object.entries(categorias)) {
+        html += `
+          <div class="mb-6">
+            <h2 class="text-lg font-extrabold text-gray-800 mb-3 border-b-2 border-red-500 pb-1 inline-block">${categoria}</h2>
+            <div class="space-y-3">
+              ${itens.map(p => {
+                const qtd = carrinho[p.id] || 0;
+                return `
+                  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 flex gap-3 items-center">
+                    <img src="${p.imagem || 'https://placehold.co/100'}" class="w-20 h-20 object-cover rounded-lg bg-gray-50">
+                    <div class="flex-1 min-w-0">
+                      <h3 class="font-bold text-gray-800 text-sm truncate">${p.nome}</h3>
+                      <p class="text-xs text-gray-500 line-clamp-2 mt-0.5">${p.descricao}</p>
+                      <span class="text-green-700 font-bold text-sm block mt-1">R$ ${Number(p.preco).toFixed(2)}</span>
+                    </div>
+                    
+                    <!-- Controles de Quantidade (+ / -) -->
+                    <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-lg border border-gray-200">
+                      ${qtd > 0 ? `
+                        <button onclick="alterarQtd(${p.id}, -1)" class="w-7 h-7 bg-red-100 text-red-600 rounded-md font-bold text-sm flex items-center justify-center active:scale-90 transition-transform">
+                          -
+                        </button>
+                        <span class="text-xs font-bold text-gray-800 w-4 text-center">${qtd}</span>
+                      ` : ''}
+                      <button onclick="alterarQtd(${p.id}, 1)" class="w-7 h-7 bg-red-600 text-white rounded-md font-bold text-sm flex items-center justify-center active:scale-90 transition-transform">
+                        +
+                      </button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
       atualizarBarra();
     }
 
+    function alterarQtd(id, delta) {
+      const atual = carrinho[id] || 0;
+      const novaQtd = atual + delta;
+
+      if (novaQtd > 0) {
+        carrinho[id] = novaQtd;
+      } else {
+        delete carrinho[id];
+      }
+
+      renderizarCardapio();
+    }
+
     function atualizarBarra() {
-      const total = carrinho.reduce((acc, item) => acc + Number(item.preco), 0);
+      let total = 0;
+      let totalItens = 0;
+
+      for (const [id, qtd] of Object.entries(carrinho)) {
+        const prod = produtos.find(p => p.id == id);
+        if (prod) {
+          total += Number(prod.preco) * qtd;
+          totalItens += qtd;
+        }
+      }
+
       document.getElementById('total-carrinho').innerText = `R$ ${total.toFixed(2)}`;
       
       const footer = document.getElementById('footer-carrinho');
-      if (carrinho.length > 0) {
+      if (totalItens > 0) {
         footer.classList.remove('hidden');
       } else {
         footer.classList.add('hidden');
@@ -97,45 +150,47 @@
       btnFinalizar.innerText = "Processando...";
       btnFinalizar.disabled = true;
 
-      // Agrupa itens do carrinho
-      const resumo = {};
+      // Monta lista de itens
       let total = 0;
-      carrinho.forEach(item => {
-        resumo[item.nome] = (resumo[item.nome] || 0) + 1;
-        total += Number(item.preco);
-      });
+      const linhasItens = [];
 
-      const itensFormatados = Object.entries(resumo)
-        .map(([itemNome, qtd]) => `• ${qtd}x ${itemNome}`)
-        .join('\n');
+      for (const [id, qtd] of Object.entries(carrinho)) {
+        const prod = produtos.find(p => p.id == id);
+        if (prod) {
+          linhasItens.push(`• ${qtd}x ${prod.nome}`);
+          total += Number(prod.preco) * qtd;
+        }
+      }
+
+      const itensFormatados = linhasItens.join('\n');
 
       try {
-        // Envia o pedido para o Apps Script
+        const payload = JSON.stringify({
+          cliente: nome,
+          itens: itensFormatados,
+          total: `R$ ${total.toFixed(2)}`,
+          endereco: endereco,
+          pagamento: pagamento
+        });
+
         const res = await fetch(API_URL, {
           method: "POST",
+          redirect: "follow",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            cliente: nome,
-            itens: itensFormatados,
-            total: `R$ ${total.toFixed(2)}`,
-            endereco: endereco,
-            pagamento: pagamento
-          })
+          body: payload
         });
 
         const resposta = await res.json();
 
-        if (resposta.status === "sucesso" && resposta.urlWhatsapp) {
-          // Abre o link do WhatsApp enviado pelo Apps Script
+        if (resposta && resposta.urlWhatsapp) {
           window.location.href = resposta.urlWhatsapp;
-          
-          carrinho = [];
-          atualizarBarra();
+          carrinho = {};
+          renderizarCardapio();
         } else {
           alert("Houve um erro ao processar o pedido. Tente novamente.");
         }
       } catch (err) {
-        console.error(err);
+        console.error("Erro na requisição:", err);
         alert("Erro de conexão ao enviar o pedido.");
       } finally {
         btnFinalizar.innerText = "Pedir pelo WhatsApp";
