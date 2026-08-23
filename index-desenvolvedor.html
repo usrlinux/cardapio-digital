@@ -1,1 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cardápio Online</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.2s ease-out forwards;
+    }
+    /* Evita que o usuário selecione/copie textos do catálogo facilmente */
+    body {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 pb-32">
 
+  <!-- Header -->
+  <header class="bg-red-600 text-white p-4 text-center sticky top-0 z-20 shadow-md">
+    <h1 class="text-xl font-bold">Lanchonete Express</h1>
+    <p class="text-xs text-red-100">Faça seu pedido online sem taxas</p>
+  </header>
+
+  <!-- Lista de Produtos agrupados por Categoria (Acordeão) -->
+  <main class="max-w-md mx-auto p-4" id="catalogo">
+    <p class="text-center text-gray-500 mt-8">Carregando cardápio...</p>
+  </main>
+
+  <!-- Barra Fixa de Finalização (Carrinho) -->
+  <div id="footer-carrinho" class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 shadow-2xl flex justify-between items-center max-w-md mx-auto hidden z-20">
+    <div>
+      <span class="text-xs text-gray-500 block">Total:</span>
+      <span class="text-lg font-bold text-gray-900" id="total-carrinho">R$ 0,00</span>
+    </div>
+    <button id="btn-finalizar" onclick="abrirCheckout()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-5 rounded-xl shadow active:scale-95 transition-all">
+      Ver Carrinho / Pedir
+    </button>
+  </div>
+
+  <!-- Modal de Montagem de Pizza Meio a Meio -->
+  <div id="modal-pizza" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl relative animate-fade-in">
+      <h3 class="text-lg font-bold text-gray-900 mb-4" id="modal-pizza-title">Montar Pizza Meio a Meio</h3>
+      
+      <div class="space-y-4">
+        <!-- Sabor 1 -->
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Primeiro Sabor (1/2)</label>
+          <select id="select-sabor1" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none focus:border-red-500 font-semibold text-gray-800">
+            <!-- Preenchido dinamicamente -->
+          </select>
+        </div>
+
+        <!-- Sabor 2 -->
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Segundo Sabor (1/2)</label>
+          <select id="select-sabor2" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none focus:border-red-500 font-semibold text-gray-800">
+            <!-- Preenchido dinamicamente -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Rodapé do Modal -->
+      <div class="mt-6 flex gap-3">
+        <button onclick="fecharModalPizza()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-xl text-sm transition-all">
+          Cancelar
+        </button>
+        <button onclick="confirmarAdicionarPizza()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-sm transition-all">
+          Adicionar R$ <span id="modal-pizza-preco">0,00</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Checkout / Resumo do Pedido -->
+  <div id="modal-checkout" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl relative my-8 animate-fade-in">
+      <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Resumo do Pedido</h3>
+      
+      <!-- Itens do Carrinho -->
+      <div id="checkout-itens" class="space-y-3 max-h-48 overflow-y-auto mb-4 border-b pb-4">
+        <!-- Inserido dinamicamente -->
+      </div>
+
+      <!-- Formulário do Cliente -->
+      <form id="form-checkout" onsubmit="enviarPedido(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Seu Nome</label>
+          <input type="text" id="checkout-nome" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none" placeholder="Ex: João Silva">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Endereço de Entrega</label>
+          <textarea id="checkout-endereco" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none" placeholder="Rua, Número, Bairro, Complemento" rows="2"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Forma de Pagamento</label>
+          <select id="checkout-pagamento" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none">
+            <option value="" disabled selected>Selecione...</option>
+            <option value="Pix">Pix</option>
+            <option value="Dinheiro">Dinheiro</option>
+            <option value="Cartão de Crédito">Cartão de Crédito</option>
+            <option value="Cartão de Débito">Cartão de Débito</option>
+          </select>
+        </div>
+
+        <!-- Total e Envio -->
+        <div class="pt-2">
+          <div class="flex justify-between items-center mb-4 font-extrabold text-gray-950">
+            <span>Total a Pagar:</span>
+            <span id="checkout-total" class="text-lg text-green-700">R$ 0,00</span>
+          </div>
+          
+          <div class="flex gap-3">
+            <button type="button" onclick="fecharCheckout()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-xl text-sm transition-all">
+              Voltar
+            </button>
+            <button type="submit" id="btn-enviar-pedido" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-xl text-sm transition-all">
+              Pedir pelo WhatsApp
+            </button>
+          </div>
+        </div>
+
+        <!-- Opção de Privacidade / Limpeza de Dados -->
+        <button type="button" onclick="limparDadosSalvos()" class="text-[10px] text-gray-400 hover:text-red-500 transition-colors text-center block w-full pt-2">
+          Limpar meus dados salvos neste celular
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ================= SCRIPT DE ANTI-INSPEÇÃO (CURIOSOS) =================
+    // 1. Bloqueia Clique Direito
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+    // 2. Bloqueia Teclas de Atalhos de Dev
+    document.addEventListener('keydown', event => {
+      if (
+        event.key === 'F12' || 
+        (event.ctrlKey && event.shiftKey && (event.key === 'I' || event.key === 'J' || event.key === 'C')) || 
+        (event.ctrlKey && event.key === 'U')
+      ) {
+        event.preventDefault();
+        return false;
+      }
+    });
+    // ======================================================================
+
+    const API_URL = "https://script.google.com/macros/s/AKfycbwiv1CzceVgKL3JOejjkHuwzhrChM9ZSkgKXU8Ee8axsBU9U0K53f7dzBLDfZPEuwU/exec";
+    
+    // IMPORTANTE: Deve bater exatamente com a chave cadastrada no Apps Script!
+    const CHAVE_SEGURANCA = "LanchoneteExpress2026SecureToken";
+
+    let TELEFONE_EMPRESA = ""; 
+    let produtos = [];
+    let carrinho = {};
+    const categoriasAbertas = new Set();
+    let pizzaSelecionadaId = null;
+
+    async function carregarProdutos() {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        
+        if (data.produtos && data.whatsapp) {
+          produtos = data.produtos;
+          TELEFONE_EMPRESA = data.whatsapp.toString().replace(/\D/g, '');
+        } else {
+          produtos = data;
+        }
+
+        renderizarCardapio();
+      } catch (err) {
+        document.getElementById('catalogo').innerHTML = '<p class="text-red-500 text-center">Erro ao carregar cardápio.</p>';
+      }
+    }
+
+    function toggleCategoria(categoria, estaAberto) {
+      if (estaAberto) {
+        categoriasAbertas.add(categoria);
+      } else {
+        categoriasAbertas.delete(categoria);
+      }
+    }
+
+    function isPizza(p) {
+      if (!p || !p.categoria) return false;
+      const cat = p.categoria.trim().toLowerCase();
+      return cat === "pizza" || cat === "pizzas";
+    }
+
+    function obterItemCarrinho(key) {
+      if (key.startsWith("pizza_")) {
+        const parts = key.split("_");
+        const id1 = parts[1];
+        const id2 = parts[2];
+        const p1 = produtos.find(p => p.id == id1);
+        const p2 = produtos.find(p => p.id == id2);
+        
+        if (p1 && p2) {
+          const preco = Math.max(Number(p1.preco), Number(p2.preco));
+          const nome1 = p1.nome.replace(/^[Pp]izza\s+/, "");
+          const nome2 = p2.nome.replace(/^[Pp]izza\s+/, "");
+          return {
+            key,
+            nome: `Pizza 1/2 ${nome1} / 1/2 ${nome2}`,
+            preco: preco
+          };
+        }
+      } else {
+        const prod = produtos.find(p => p.id == key);
+        if (prod) {
+          return {
+            key,
+            nome: prod.nome,
+            preco: Number(prod.preco)
+          };
+        }
+      }
+      return null;
+    }
+
+    function renderizarCardapio() {
+      const container = document.getElementById('catalogo');
+      
+      const categories = produtos.reduce((acc, p) => {
+        const cat = p.categoria || "Outros";
+        if (!acc[cat]) acc[cat] = [];
+        acc[cat].push(p);
+        return acc;
+      }, {});
+
+      let html = '';
+
+      for (const [categoria, itens] of Object.entries(categories)) {
+        const isOpen = categoriasAbertas.has(categoria) ? 'open' : '';
+        const catEscapada = categoria.replace(/'/g, "\\'");
+
+        html += `
+          <details ${isOpen} ontoggle="toggleCategoria('${catEscapada}', this.open)" class="group mb-4 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <summary class="flex justify-between items-center p-3.5 font-bold text-gray-800 cursor-pointer select-none bg-gray-50 hover:bg-gray-100 transition-colors list-none">
+              <div class="flex items-center gap-2">
+                <span class="w-1.5 h-5 bg-red-600 rounded-full"></span>
+                <span class="text-base font-extrabold">${categoria}</span>
+                <span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full font-medium">${itens.length}</span>
+              </div>
+              <svg class="w-5 h-5 text-gray-500 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </summary>
+
+            <div class="p-3 space-y-3 border-t border-gray-100">
+              ${itens.map(p => {
+                const qtd = carrinho[p.id] || 0;
+                const ePizza = isPizza(p);
+                return `
+                  <div class="bg-white rounded-xl border border-gray-100 p-3 flex gap-3 items-center hover:border-gray-300 transition-colors">
+                    <img src="${p.imagem || 'https://placehold.co/100'}" class="w-20 h-20 object-cover rounded-lg bg-gray-50 flex-shrink-0">
+                    <div class="flex-1 min-w-0">
+                      <h3 class="font-bold text-gray-800 text-sm truncate">${p.nome}</h3>
+                      <p class="text-xs text-gray-500 line-clamp-2 mt-0.5">${p.descricao}</p>
+                      <span class="text-green-700 font-bold text-sm block mt-1">R$ ${Number(p.preco).toFixed(2)}</span>
+                    </div>
+                    
+                    <div class="flex flex-col items-end gap-2 flex-shrink-0">
+                      <!-- Controles de Quantidade (Sabor Único) -->
+                      <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-lg border border-gray-200">
+                        ${qtd > 0 ? `
+                          <button onclick="alterarQtd(${p.id}, -1)" class="w-7 h-7 bg-red-100 text-red-600 rounded-md font-bold text-sm flex items-center justify-center active:scale-90 transition-transform">
+                            -
+                          </button>
+                          <span class="text-xs font-bold text-gray-800 w-4 text-center">${qtd}</span>
+                        ` : ''}
+                        <button onclick="alterarQtd(${p.id}, 1)" class="w-7 h-7 bg-red-600 text-white rounded-md font-bold text-sm flex items-center justify-center active:scale-90 transition-transform">
+                          +
+                        </button>
+                      </div>
+                      
+                      <!-- Botão Meio a Meio (Aparece apenas nas pizzas) -->
+                      ${ePizza ? `
+                        <button onclick="abrirModalPizza(${p.id})" class="text-[11px] bg-amber-500 hover:bg-amber-600 text-white font-extrabold py-1 px-2.5 rounded-lg shadow-sm active:scale-95 transition-all">
+                          Meio a Meio
+                        </button>
+                      ` : ''}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </details>
+        `;
+      }
+
+      container.innerHTML = html;
+      atualizarBarra();
+    }
+
+    function alterarQtd(id, delta) {
+      const key = id.toString();
+      const prod = produtos.find(p => p.id == id);
+      if (!prod) return;
+
+      const atual = carrinho[key] || 0;
+      const novaQtd = atual + delta;
+
+      if (novaQtd > 0) {
+        carrinho[key] = novaQtd;
+      } else {
+        delete carrinho[key];
+      }
+
+      renderizarCardapio();
+    }
+
+    /* SISTEMA DE PIZZA MEIO A MEIO (MODAL) */
+    function abrirModalPizza(id) {
+      pizzaSelecionadaId = id;
+      
+      const prod = produtos.find(p => p.id == id);
+      if (!prod) return;
+
+      const pizzasDisponiveis = produtos.filter(p => isPizza(p));
+      
+      const select1 = document.getElementById('select-sabor1');
+      select1.innerHTML = pizzasDisponiveis.map(p => `
+        <option value="${p.id}" ${p.id == id ? 'selected' : ''}>${p.nome} - R$ ${Number(p.preco).toFixed(2)}</option>
+      `).join('');
+      
+      const select2 = document.getElementById('select-sabor2');
+      select2.innerHTML = pizzasDisponiveis.map(p => `
+        <option value="${p.id}">${p.nome} - R$ ${Number(p.preco).toFixed(2)}</option>
+      `).join('');
+
+      document.getElementById('modal-pizza').classList.remove('hidden');
+      atualizarPrecoModal();
+    }
+
+    function fecharModalPizza() {
+      document.getElementById('modal-pizza').classList.add('hidden');
+    }
+
+    function atualizarPrecoModal() {
+      const idSabor1 = document.getElementById('select-sabor1').value;
+      const idSabor2 = document.getElementById('select-sabor2').value;
+      
+      const p1 = produtos.find(p => p.id == idSabor1);
+      const p2 = produtos.find(p => p.id == idSabor2);
+      
+      if (p1 && p2) {
+        const precoFinal = Math.max(Number(p1.preco), Number(p2.preco));
+        document.getElementById('modal-pizza-preco').innerText = precoFinal.toFixed(2);
+      }
+    }
+
+    document.getElementById('select-sabor1').addEventListener('change', atualizarPrecoModal);
+    document.getElementById('select-sabor2').addEventListener('change', atualizarPrecoModal);
+
+    function confirmarAdicionarPizza() {
+      const idSabor1 = document.getElementById('select-sabor1').value;
+      const idSabor2 = document.getElementById('select-sabor2').value;
+      
+      if (idSabor1 === idSabor2) {
+        const key = idSabor1.toString();
+        carrinho[key] = (carrinho[key] || 0) + 1;
+      } else {
+        const saboresOrdenados = [idSabor1, idSabor2].sort((a, b) => Number(a) - Number(b));
+        const key = `pizza_${saboresOrdenados[0]}_${saboresOrdenados[1]}`;
+        carrinho[key] = (carrinho[key] || 0) + 1;
+      }
+
+      fecharModalPizza();
+      renderizarCardapio();
+    }
+
+    /* SISTEMA DE ATUALIZAÇÃO DO CARRINHO E CHECKOUT */
+    function atualizarBarra() {
+      let total = 0;
+      let totalItens = 0;
+
+      for (const [key, qtd] of Object.entries(carrinho)) {
+        const item = obterItemCarrinho(key);
+        if (item) {
+          total += item.preco * qtd;
+          totalItens += qtd;
+        }
+      }
+
+      document.getElementById('total-carrinho').innerText = `R$ ${total.toFixed(2)}`;
+      
+      const footer = document.getElementById('footer-carrinho');
+      if (totalItens > 0) {
+        footer.classList.remove('hidden');
+      } else {
+        footer.classList.add('hidden');
+      }
+    }
+
+    function carregarDadosCliente() {
+      const nomeSalvo = localStorage.getItem('cliente_nome');
+      const enderecoSalvo = localStorage.getItem('cliente_endereco');
+      const pagamentoSalvo = localStorage.getItem('cliente_pagamento');
+
+      if (nomeSalvo) {
+        document.getElementById('checkout-nome').value = nomeSalvo;
+      }
+      if (enderecoSalvo) {
+        document.getElementById('checkout-endereco').value = enderecoSalvo;
+      }
+      if (pagamentoSalvo) {
+        document.getElementById('checkout-pagamento').value = pagamentoSalvo;
+      }
+    }
+
+    function limparDadosSalvos() {
+      if (confirm("Deseja realmente apagar seus dados de entrega salvos neste aparelho?")) {
+        localStorage.removeItem('cliente_nome');
+        localStorage.removeItem('cliente_endereco');
+        localStorage.removeItem('cliente_pagamento');
+        
+        document.getElementById('checkout-nome').value = '';
+        document.getElementById('checkout-endereco').value = '';
+        document.getElementById('checkout-pagamento').selectedIndex = 0;
+        
+        alert("Dados limpos com sucesso!");
+      }
+    }
+
+    function abrirCheckout() {
+      const container = document.getElementById('checkout-itens');
+      let total = 0;
+      let html = '';
+
+      const itensValidos = [];
+
+      for (const [key, qtd] of Object.entries(carrinho)) {
+        const item = obterItemCarrinho(key);
+        if (item) {
+          total += item.preco * qtd;
+          itensValidos.push({ ...item, qtd });
+        }
+      }
+
+      if (itensValidos.length === 0) {
+        fecharCheckout();
+        return;
+      }
+
+      html = itensValidos.map(item => `
+        <div class="flex justify-between items-center gap-2 py-2 border-b border-gray-100 last:border-0">
+          <div class="flex-1 min-w-0">
+            <p class="font-bold text-gray-800 text-sm truncate">${item.nome}</p>
+            <p class="text-xs text-gray-500">R$ ${item.preco.toFixed(2)} un.</p>
+          </div>
+          
+          <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-lg border border-gray-200 flex-shrink-0">
+            <button type="button" onclick="alterarQtdCarrinho('${item.key}', -1)" class="w-6 h-6 bg-red-100 text-red-600 rounded-md font-bold text-xs flex items-center justify-center active:scale-90 transition-transform">
+              -
+            </button>
+            <span class="text-xs font-bold text-gray-800 w-4 text-center">${item.qtd}</span>
+            <button type="button" onclick="alterarQtdCarrinho('${item.key}', 1)" class="w-6 h-6 bg-red-600 text-white rounded-md font-bold text-xs flex items-center justify-center active:scale-90 transition-transform">
+              +
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      container.innerHTML = html;
+      document.getElementById('checkout-total').innerText = `R$ ${total.toFixed(2)}`;
+      
+      carregarDadosCliente();
+
+      document.getElementById('modal-checkout').classList.remove('hidden');
+    }
+
+    function alterarQtdCarrinho(key, delta) {
+      const atual = carrinho[key] || 0;
+      const novaQtd = atual + delta;
+
+      if (novaQtd > 0) {
+        carrinho[key] = novaQtd;
+      } else {
+        delete carrinho[key];
+      }
+
+      renderizarCardapio();
+      
+      let totalItens = 0;
+      for (const [k, q] of Object.entries(carrinho)) {
+        if (obterItemCarrinho(k)) totalItens += q;
+      }
+
+      if (totalItens === 0) {
+        fecharCheckout();
+      } else {
+        abrirCheckout();
+      }
+    }
+
+    function fecharCheckout() {
+      document.getElementById('modal-checkout').classList.add('hidden');
+    }
+
+    function gerarNumeroPedido() {
+      const agora = new Date();
+      const dia = String(agora.getDate()).padStart(2, '0');
+      const mes = String(agora.getMonth() + 1).padStart(2, '0');
+      const aleatorio = Math.floor(1000 + Math.random() * 9000); 
+      return `#${dia}${mes}-${aleatorio}`;
+    }
+
+    async function enviarPedido(event) {
+      event.preventDefault();
+
+      let totalItens = 0;
+      for (const [k, q] of Object.entries(carrinho)) {
+        if (obterItemCarrinho(k)) totalItens += q;
+      }
+      if (totalItens === 0) {
+        alert("Seu carrinho está vazio!");
+        fecharCheckout();
+        return;
+      }
+
+      if (!TELEFONE_EMPRESA) {
+        alert("Houve um atraso na conexão ao carregar o telefone do estabelecimento. Por favor, aguarde 2 segundos e tente novamente.");
+        return;
+      }
+
+      const nome = document.getElementById('checkout-nome').value;
+      const endereco = document.getElementById('checkout-endereco').value;
+      const pagamento = document.getElementById('checkout-pagamento').value;
+
+      localStorage.setItem('cliente_nome', nome);
+      localStorage.setItem('cliente_endereco', endereco);
+      localStorage.setItem('cliente_pagamento', pagamento);
+
+      let total = 0;
+      const linhasItens = [];
+
+      for (const [key, qtd] of Object.entries(carrinho)) {
+        const item = obterItemCarrinho(key);
+        if (item) {
+          linhasItens.push(`• ${qtd}x ${item.nome}`);
+          total += item.preco * qtd;
+        }
+      }
+
+      const itensFormatados = linhasItens.join('\n');
+      const numeroPedido = gerarNumeroPedido();
+
+      const textoMensagem = `*PEDIDO ${numeroPedido}*\n` +
+                            `-----------------------\n` +
+                            `*Cliente:* ${nome}\n` +
+                            `*Endereço:* ${endereco}\n` +
+                            `*Pagamento:* ${pagamento}\n\n` +
+                            `*Itens:*\n${itensFormatados}\n\n` +
+                            `*Total:* R$ ${total.toFixed(2)}`;
+
+      const urlWhatsapp = `https://api.whatsapp.com/send?phone=${TELEFONE_EMPRESA}&text=${encodeURIComponent(textoMensagem)}`;
+
+      window.location.href = urlWhatsapp;
+
+      // NOVO: Agora enviamos a 'CHAVE_SEGURANCA' (token) na requisição
+      fetch(API_URL, {
+        method: "POST",
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          token: CHAVE_SEGURANCA, // Handshake obrigatório
+          pedido: numeroPedido,
+          cliente: nome,
+          itens: itensFormatados,
+          total: `R$ ${total.toFixed(2)}`,
+          endereco: endereco,
+          pagamento: pagamento
+        }),
+        keepalive: true
+      }).catch(err => console.error("Erro ao registrar pedido na planilha em segundo plano:", err));
+
+      carrinho = {};
+      fecharCheckout();
+      renderizarCardapio();
+    }
+
+    carregarProdutos();
+  </script>
+</body>
+</html>
