@@ -13,6 +13,13 @@
     .animate-fade-in {
       animation: fadeIn 0.2s ease-out forwards;
     }
+    /* Evita que o usuário selecione/copie textos do catálogo facilmente */
+    body {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
   </style>
 </head>
 <body class="bg-gray-100 pb-32">
@@ -88,15 +95,15 @@
       <form id="form-checkout" onsubmit="enviarPedido(event)" class="space-y-3">
         <div>
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Seu Nome</label>
-          <input type="text" id="checkout-nome" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none focus:border-red-500" placeholder="Ex: João Silva">
+          <input type="text" id="checkout-nome" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none" placeholder="Ex: João Silva">
         </div>
         <div>
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Endereço de Entrega</label>
-          <textarea id="checkout-endereco" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none focus:border-red-500" placeholder="Rua, Número, Bairro, Complemento" rows="2"></textarea>
+          <textarea id="checkout-endereco" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none" placeholder="Rua, Número, Bairro, Complemento" rows="2"></textarea>
         </div>
         <div>
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Forma de Pagamento</label>
-          <select id="checkout-pagamento" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none focus:border-red-500">
+          <select id="checkout-pagamento" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none">
             <option value="" disabled selected>Selecione...</option>
             <option value="Pix">Pix</option>
             <option value="Dinheiro">Dinheiro</option>
@@ -131,10 +138,29 @@
   </div>
 
   <script>
+    // ================= SCRIPT DE ANTI-INSPEÇÃO (CURIOSOS) =================
+    // 1. Bloqueia Clique Direito
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+    // 2. Bloqueia Teclas de Atalhos de Dev
+    document.addEventListener('keydown', event => {
+      if (
+        event.key === 'F12' || 
+        (event.ctrlKey && event.shiftKey && (event.key === 'I' || event.key === 'J' || event.key === 'C')) || 
+        (event.ctrlKey && event.key === 'U')
+      ) {
+        event.preventDefault();
+        return false;
+      }
+    });
+    // ======================================================================
+
     const API_URL = "https://script.google.com/macros/s/AKfycbwiv1CzceVgKL3JOejjkHuwzhrChM9ZSkgKXU8Ee8axsBU9U0K53f7dzBLDfZPEuwU/exec";
     
-    let TELEFONE_EMPRESA = ""; 
+    // IMPORTANTE: Deve bater exatamente com a chave cadastrada no Apps Script!
+    const CHAVE_SEGURANCA = "LanchoneteExpress2026SecureToken";
 
+    let TELEFONE_EMPRESA = ""; 
     let produtos = [];
     let carrinho = {};
     const categoriasAbertas = new Set();
@@ -175,7 +201,6 @@
     function obterItemCarrinho(key) {
       if (key.startsWith("pizza_")) {
         const parts = key.split("_");
-        // CORREÇÃO: Resgata os IDs usando os índices numéricos corretos do array gerado pelo split
         const id1 = parts[1];
         const id2 = parts[2];
         const p1 = produtos.find(p => p.id == id1);
@@ -348,7 +373,6 @@
         carrinho[key] = (carrinho[key] || 0) + 1;
       } else {
         const saboresOrdenados = [idSabor1, idSabor2].sort((a, b) => Number(a) - Number(b));
-        // CORREÇÃO: Cria a chave limpa unindo os IDs específicos de forma stringificada simples
         const key = `pizza_${saboresOrdenados[0]}_${saboresOrdenados[1]}`;
         carrinho[key] = (carrinho[key] || 0) + 1;
       }
@@ -530,9 +554,7 @@
         }
       }
 
-      // CORREÇÃO: Removido o erro de digitação duplo
       const itensFormatados = linhasItens.join('\n');
-
       const numeroPedido = gerarNumeroPedido();
 
       const textoMensagem = `*PEDIDO ${numeroPedido}*\n` +
@@ -547,11 +569,13 @@
 
       window.location.href = urlWhatsapp;
 
+      // NOVO: Agora enviamos a 'CHAVE_SEGURANCA' (token) na requisição
       fetch(API_URL, {
         method: "POST",
         redirect: "follow",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({
+          token: CHAVE_SEGURANCA, // Handshake obrigatório
           pedido: numeroPedido,
           cliente: nome,
           itens: itensFormatados,
