@@ -175,7 +175,6 @@
     function obterItemCarrinho(key) {
       if (key.startsWith("pizza_")) {
         const parts = key.split("_");
-        // CORREÇÃO: Resgata os sabores usando os índices corretos da partição por underline
         const id1 = parts[1];
         const id2 = parts[2];
         const p1 = produtos.find(p => p.id == id1);
@@ -348,8 +347,7 @@
         carrinho[key] = (carrinho[key] || 0) + 1;
       } else {
         const saboresOrdenados = [idSabor1, idSabor2].sort((a, b) => Number(a) - Number(b));
-        // CORREÇÃO: Une os sabores usando underlines individuais para a leitura correta no obterItemCarrinho
-        const key = `pizza_${saboresOrdenados[0]}_${saboresOrdenados[1]}`;
+        const key = `pizza_${saboresOrdenados}_${saboresOrdenados[1]}`;
         carrinho[key] = (carrinho[key] || 0) + 1;
       }
 
@@ -485,6 +483,15 @@
       document.getElementById('modal-checkout').classList.add('hidden');
     }
 
+    // NOVO: Função para gerar o identificador único do pedido de forma instantânea
+    function gerarNumeroPedido() {
+      const agora = new Date();
+      const dia = String(agora.getDate()).padStart(2, '0');
+      const mes = String(agora.getMonth() + 1).padStart(2, '0');
+      const aleatorio = Math.floor(1000 + Math.random() * 9000); // Gera 4 dígitos de 1000 a 9999
+      return `#${dia}${mes}-${aleatorio}`;
+    }
+
     async function enviarPedido(event) {
       event.preventDefault();
 
@@ -522,9 +529,13 @@
         }
       }
 
-      const itensFormatados = linhasItens.join('\n');
+      const itensFormatados = líneasItens = linhasItens.join('\n');
 
-      const textoMensagem = `*NOVO PEDIDO*\n` +
+      // NOVO: Geração do número de pedido no ato do envio
+      const numeroPedido = gerarNumeroPedido();
+
+      // Monta a mensagem do WhatsApp incluindo o novo número de pedido no título
+      const textoMensagem = `*PEDIDO ${numeroPedido}*\n` +
                             `-----------------------\n` +
                             `*Cliente:* ${nome}\n` +
                             `*Endereço:* ${endereco}\n` +
@@ -534,13 +545,16 @@
 
       const urlWhatsapp = `https://api.whatsapp.com/send?phone=${TELEFONE_EMPRESA}&text=${encodeURIComponent(textoMensagem)}`;
 
+      // Redireciona o cliente instantaneamente para o WhatsApp
       window.location.href = urlWhatsapp;
 
+      // Envia os dados silenciosamente para o Google Sheets em segundo plano (com o ID do pedido incluído!)
       fetch(API_URL, {
         method: "POST",
         redirect: "follow",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({
+          pedido: numeroPedido, // Envia o número identificador para salvar na planilha
           cliente: nome,
           itens: itensFormatados,
           total: `R$ ${total.toFixed(2)}`,
