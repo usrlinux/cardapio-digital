@@ -175,6 +175,7 @@
     function obterItemCarrinho(key) {
       if (key.startsWith("pizza_")) {
         const parts = key.split("_");
+        // CORREÇÃO: Resgata os IDs usando os índices numéricos corretos do array gerado pelo split
         const id1 = parts[1];
         const id2 = parts[2];
         const p1 = produtos.find(p => p.id == id1);
@@ -326,11 +327,11 @@
       const idSabor1 = document.getElementById('select-sabor1').value;
       const idSabor2 = document.getElementById('select-sabor2').value;
       
-      const prod1 = produtos.find(p => p.id == idSabor1);
-      const prod2 = produtos.find(p => p.id == idSabor2);
+      const p1 = produtos.find(p => p.id == idSabor1);
+      const p2 = produtos.find(p => p.id == idSabor2);
       
-      if (prod1 && prod2) {
-        const precoFinal = Math.max(Number(prod1.preco), Number(prod2.preco));
+      if (p1 && p2) {
+        const precoFinal = Math.max(Number(p1.preco), Number(p2.preco));
         document.getElementById('modal-pizza-preco').innerText = precoFinal.toFixed(2);
       }
     }
@@ -347,7 +348,8 @@
         carrinho[key] = (carrinho[key] || 0) + 1;
       } else {
         const saboresOrdenados = [idSabor1, idSabor2].sort((a, b) => Number(a) - Number(b));
-        const key = `pizza_${saboresOrdenados}_${saboresOrdenados[1]}`;
+        // CORREÇÃO: Cria a chave limpa unindo os IDs específicos de forma stringificada simples
+        const key = `pizza_${saboresOrdenados[0]}_${saboresOrdenados[1]}`;
         carrinho[key] = (carrinho[key] || 0) + 1;
       }
 
@@ -483,12 +485,11 @@
       document.getElementById('modal-checkout').classList.add('hidden');
     }
 
-    // NOVO: Função para gerar o identificador único do pedido de forma instantânea
     function gerarNumeroPedido() {
       const agora = new Date();
       const dia = String(agora.getDate()).padStart(2, '0');
       const mes = String(agora.getMonth() + 1).padStart(2, '0');
-      const aleatorio = Math.floor(1000 + Math.random() * 9000); // Gera 4 dígitos de 1000 a 9999
+      const aleatorio = Math.floor(1000 + Math.random() * 9000); 
       return `#${dia}${mes}-${aleatorio}`;
     }
 
@@ -529,12 +530,11 @@
         }
       }
 
-      const itensFormatados = líneasItens = linhasItens.join('\n');
+      // CORREÇÃO: Removido o erro de digitação duplo
+      const itensFormatados = linhasItens.join('\n');
 
-      // NOVO: Geração do número de pedido no ato do envio
       const numeroPedido = gerarNumeroPedido();
 
-      // Monta a mensagem do WhatsApp incluindo o novo número de pedido no título
       const textoMensagem = `*PEDIDO ${numeroPedido}*\n` +
                             `-----------------------\n` +
                             `*Cliente:* ${nome}\n` +
@@ -545,16 +545,14 @@
 
       const urlWhatsapp = `https://api.whatsapp.com/send?phone=${TELEFONE_EMPRESA}&text=${encodeURIComponent(textoMensagem)}`;
 
-      // Redireciona o cliente instantaneamente para o WhatsApp
       window.location.href = urlWhatsapp;
 
-      // Envia os dados silenciosamente para o Google Sheets em segundo plano (com o ID do pedido incluído!)
       fetch(API_URL, {
         method: "POST",
         redirect: "follow",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({
-          pedido: numeroPedido, // Envia o número identificador para salvar na planilha
+          pedido: numeroPedido,
           cliente: nome,
           itens: itensFormatados,
           total: `R$ ${total.toFixed(2)}`,
