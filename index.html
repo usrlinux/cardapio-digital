@@ -133,7 +133,6 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwiv1CzceVgKL3JOejjkHuwzhrChM9ZSkgKXU8Ee8axsBU9U0K53f7dzBLDfZPEuwU/exec";
     
-    // Armazena o telefone dinamicamente sem expor no GitHub
     let TELEFONE_EMPRESA = ""; 
 
     let produtos = [];
@@ -146,12 +145,10 @@
         const res = await fetch(API_URL);
         const data = await res.json();
         
-        // NOVO: Detecta se o Apps Script retornou a estrutura com produtos + whatsapp
         if (data.produtos && data.whatsapp) {
           produtos = data.produtos;
-          TELEFONE_EMPRESA = data.whatsapp.toString().replace(/\D/g, ''); // Limpa caracteres não numéricos
+          TELEFONE_EMPRESA = data.whatsapp.toString().replace(/\D/g, '');
         } else {
-          // Fallback de compatibilidade caso o Apps Script ainda não tenha sido atualizado
           produtos = data;
         }
 
@@ -178,8 +175,9 @@
     function obterItemCarrinho(key) {
       if (key.startsWith("pizza_")) {
         const parts = key.split("_");
-        const id1 = parts;
-        const id2 = parts;
+        // CORREÇÃO: Resgata os sabores usando os índices corretos da partição por underline
+        const id1 = parts[1];
+        const id2 = parts[2];
         const p1 = produtos.find(p => p.id == id1);
         const p2 = produtos.find(p => p.id == id2);
         
@@ -350,7 +348,8 @@
         carrinho[key] = (carrinho[key] || 0) + 1;
       } else {
         const saboresOrdenados = [idSabor1, idSabor2].sort((a, b) => Number(a) - Number(b));
-        const key = `pizza_${saboresOrdenados}_${saboresOrdenados}`;
+        // CORREÇÃO: Une os sabores usando underlines individuais para a leitura correta no obterItemCarrinho
+        const key = `pizza_${saboresOrdenados[0]}_${saboresOrdenados[1]}`;
         carrinho[key] = (carrinho[key] || 0) + 1;
       }
 
@@ -499,7 +498,6 @@
         return;
       }
 
-      // NOVO: Validação extra de segurança para carregar o telefone
       if (!TELEFONE_EMPRESA) {
         alert("Houve um atraso na conexão ao carregar o telefone do estabelecimento. Por favor, aguarde 2 segundos e tente novamente.");
         return;
@@ -509,7 +507,6 @@
       const endereco = document.getElementById('checkout-endereco').value;
       const pagamento = document.getElementById('checkout-pagamento').value;
 
-      // Salva os dados localmente no celular do cliente
       localStorage.setItem('cliente_nome', nome);
       localStorage.setItem('cliente_endereco', endereco);
       localStorage.setItem('cliente_pagamento', pagamento);
@@ -527,7 +524,6 @@
 
       const itensFormatados = linhasItens.join('\n');
 
-      // Monta o texto de envio para o WhatsApp
       const textoMensagem = `*NOVO PEDIDO*\n` +
                             `-----------------------\n` +
                             `*Cliente:* ${nome}\n` +
@@ -538,10 +534,8 @@
 
       const urlWhatsapp = `https://api.whatsapp.com/send?phone=${TELEFONE_EMPRESA}&text=${encodeURIComponent(textoMensagem)}`;
 
-      // Redireciona o cliente instantaneamente para o WhatsApp
       window.location.href = urlWhatsapp;
 
-      // Envia os dados silenciosamente para o Google Sheets em segundo plano
       fetch(API_URL, {
         method: "POST",
         redirect: "follow",
@@ -556,7 +550,6 @@
         keepalive: true
       }).catch(err => console.error("Erro ao registrar pedido na planilha em segundo plano:", err));
 
-      // Limpa as variáveis locais de carrinho e fecha janelas de checkout
       carrinho = {};
       fecharCheckout();
       renderizarCardapio();
