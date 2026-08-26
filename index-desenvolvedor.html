@@ -156,19 +156,45 @@
     // ======================================================================
 
     const API_URL = "https://script.google.com/macros/s/AKfycbwiv1CzceVgKL3JOejjkHuwzhrChM9ZSkgKXU8Ee8axsBU9U0K53f7dzBLDfZPEuwU/exec";
-    
+
     // IMPORTANTE: Deve bater exatamente com a chave cadastrada no Apps Script!
     const CHAVE_SEGURANCA = "LanchoneteExpress2026SecureToken";
-
-    let TELEFONE_EMPRESA = ""; 
+    
+    // Captura dinamicamente os parâmetros de teste da URL se houver (Ex: ?token=DEMO-1234)
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlToken = urlParams.get('token') || ""; 
+    const TOKEN_SISTEMA = urlToken || CHAVE_SEGURANCA;
+    
+    // Injeta dinamicamente o banner informativo sob o cabeçalho apenas se estiver em modo de simulação
+    if (urlToken) {
+      window.addEventListener('DOMContentLoaded', () => {
+        const header = document.querySelector('header');
+        if (header) {
+          const banner = document.createElement('div');
+          banner.className = "bg-amber-500 text-amber-950 p-2.5 text-center text-xs font-black border-b border-amber-600 shadow-inner select-none";
+          banner.innerText = "⚠️ MODO DE TESTES SIMULADO - EXCLUSIVO POR 1 HORA";
+          header.insertAdjacentElement('afterend', banner);
+        }
+      });
+    }
+    
+    let TELEFONE_EMPRESA = "";
+    
     let produtos = [];
+    
     let carrinho = {};
+    
     const categoriasAbertas = new Set();
+    
     let pizzaSelecionadaId = null;
-
+    
     async function carregarProdutos() {
-      try {
-        const res = await fetch(API_URL);
+    
+    try {
+        // Se for simulação de teste, passa o token dinâmico para buscar o cardápio do sandbox de demonstração
+        const fetchUrl = urlToken ? `${API_URL}?token=${encodeURIComponent(urlToken)}` : API_URL;
+        
+        const res = await fetch(fetchUrl);
         const data = await res.json();
         
         if (data.produtos && data.whatsapp) {
@@ -571,20 +597,34 @@
 
       // NOVO: Agora enviamos a 'CHAVE_SEGURANCA' (token) na requisição
       fetch(API_URL, {
-        method: "POST",
-        redirect: "follow",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-          token: CHAVE_SEGURANCA, // Handshake obrigatório
-          pedido: numeroPedido,
-          cliente: nome,
-          itens: itensFormatados,
-          total: `R$ ${total.toFixed(2)}`,
-          endereco: endereco,
-          pagamento: pagamento
-        }),
-        keepalive: true
-      }).catch(err => console.error("Erro ao registrar pedido na planilha em segundo plano:", err));
+
+method: "POST",
+
+redirect: "follow",
+
+headers: { "Content-Type": "text/plain;charset=utf-8" },
+
+body: JSON.stringify({
+
+token: TOKEN_SISTEMA, // Handshake dinâmico (CHAVE_SEGURANCA para produção ou token temporário para testes de leads)
+
+pedido: numeroPedido,
+
+cliente: nome,
+
+itens: itensFormatados,
+
+total: `R$ ${total.toFixed(2)}`,
+
+endereco: endereco,
+
+pagamento: pagamento
+
+}),
+
+keepalive: true
+
+}).catch(err => console.error("Erro ao registrar pedido na planilha em segundo plano:", err));
 
       carrinho = {};
       fecharCheckout();
