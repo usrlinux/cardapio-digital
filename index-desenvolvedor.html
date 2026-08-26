@@ -544,93 +544,77 @@
     }
 
     async function enviarPedido(event) {
-      event.preventDefault();
-
-      let totalItens = 0;
-      for (const [k, q] of Object.entries(carrinho)) {
-        if (obterItemCarrinho(k)) totalItens += q;
-      }
-      if (totalItens === 0) {
-        alert("Seu carrinho está vazio!");
-        fecharCheckout();
-        return;
-      }
-
-      if (!TELEFONE_EMPRESA) {
-        alert("Houve um atraso na conexão ao carregar o telefone do estabelecimento. Por favor, aguarde 2 segundos e tente novamente.");
-        return;
-      }
-
-      const nome = document.getElementById('checkout-nome').value;
-      const endereco = document.getElementById('checkout-endereco').value;
-      const pagamento = document.getElementById('checkout-pagamento').value;
-
-      localStorage.setItem('cliente_nome', nome);
-      localStorage.setItem('cliente_endereco', endereco);
-      localStorage.setItem('cliente_pagamento', pagamento);
-
-      let total = 0;
-      const linhasItens = [];
-
-      for (const [key, qtd] of Object.entries(carrinho)) {
-        const item = obterItemCarrinho(key);
-        if (item) {
-          linhasItens.push(`• ${qtd}x ${item.nome}`);
-          total += item.preco * qtd;
-        }
-      }
-
-      const itensFormatados = linhasItens.join('\n');
-      const numeroPedido = gerarNumeroPedido();
-
-      const textoMensagem = `*PEDIDO ${numeroPedido}*\n` +
-                            `-----------------------\n` +
-                            `*Cliente:* ${nome}\n` +
-                            `*Endereço:* ${endereco}\n` +
-                            `*Pagamento:* ${pagamento}\n\n` +
-                            `*Itens:*\n${itensFormatados}\n\n` +
-                            `*Total:* R$ ${total.toFixed(2)}`;
-
-      const urlWhatsapp = `https://api.whatsapp.com/send?phone=${TELEFONE_EMPRESA}&text=${encodeURIComponent(textoMensagem)}`;
-
-      window.location.href = urlWhatsapp;
-
-      // NOVO: Agora enviamos a 'CHAVE_SEGURANCA' (token) na requisição
-      fetch(API_URL, {
-
-method: "POST",
-
-redirect: "follow",
-
-headers: { "Content-Type": "text/plain;charset=utf-8" },
-
-body: JSON.stringify({
-
-token: TOKEN_SISTEMA, // Handshake dinâmico (CHAVE_SEGURANCA para produção ou token temporário para testes de leads)
-
-pedido: numeroPedido,
-
-cliente: nome,
-
-itens: itensFormatados,
-
-total: `R$ ${total.toFixed(2)}`,
-
-endereco: endereco,
-
-pagamento: pagamento
-
-}),
-
-keepalive: true
-
-}).catch(err => console.error("Erro ao registrar pedido na planilha em segundo plano:", err));
-
-      carrinho = {};
-      fecharCheckout();
-      renderizarCardapio();
+  event.preventDefault();
+  let totalItens = 0;
+  for (const [k, q] of Object.entries(carrinho)) {
+    if (obterItemCarrinho(k)) totalItens += q;
+  }
+  if (totalItens === 0) {
+    alert("Seu carrinho está vazio!");
+    fecharCheckout();
+    return;
+  }
+  if (!TELEFONE_EMPRESA) {
+    alert("Houve um atraso na conexão ao carregar o telefone do estabelecimento. Por favor, aguarde 2 segundos e tente novamente.");
+    return;
+  }
+  
+  const nome = document.getElementById('checkout-nome').value;
+  const endereco = document.getElementById('checkout-endereco').value;
+  const pagamento = document.getElementById('checkout-pagamento').value;
+  
+  localStorage.setItem('cliente_nome', nome);
+  localStorage.setItem('cliente_endereco', endereco);
+  localStorage.setItem('cliente_pagamento', pagamento);
+  
+  let total = 0;
+  const linhasItens = [];
+  for (const [key, qtd] of Object.entries(carrinho)) {
+    const item = obterItemCarrinho(key);
+    if (item) {
+      linhasItens.push(`• ${qtd}x ${item.nome}`);
+      total += item.preco * qtd;
     }
+  }
+  
+  const itensFormatados = linhasItens.join('\n');
+  const numeroPedido = gerarNumeroPedido();
+  
+  const textoMensagem = `*PEDIDO ${numeroPedido}*\n` + 
+                        `-----------------------\n` + 
+                        `*Cliente:* ${nome}\n` + 
+                        `*Endereço:* ${endereco}\n` + 
+                        `*Pagamento:* ${pagamento}\n\n` + 
+                        `*Itens:*\n${itensFormatados}\n\n` + 
+                        `*Total:* R$ ${total.toFixed(2)}`;
+  
+  const urlWhatsapp = `https://api.whatsapp.com/send?phone=${TELEFONE_EMPRESA}&text=${encodeURIComponent(textoMensagem)}`;
 
+  // 1º DISPARA O FETCH (Envia os dados em segundo plano de forma assíncrona)
+  fetch(API_URL, {
+    method: "POST",
+    redirect: "follow",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({
+      token: TOKEN_SISTEMA, // Handshake dinâmico
+      pedido: numeroPedido,
+      cliente: nome,
+      itens: itensFormatados,
+      total: `R$ ${total.toFixed(2)}`,
+      endereco: endereco,
+      pagamento: pagamento
+    }),
+    keepalive: true
+  }).catch(err => console.error("Erro ao registrar pedido na planilha em segundo plano:", err));
+
+  // 2º LIMPA O CARRINHO LOCALMENTE E ATUALIZA A TELA
+  carrinho = {};
+  fecharCheckout();
+  renderizarCardapio();
+
+  // 3º REDIRECIONA PARA O WHATSAPP (Acontece por último com segurança!)
+  window.location.href = urlWhatsapp;
+}
     carregarProdutos();
   </script>
 </body>
