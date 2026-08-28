@@ -581,14 +581,15 @@
       const urlWhatsapp = `https://api.whatsapp.com/send?phone=${destinoWhatsapp}&text=${encodeURIComponent(textoMensagem)}`;
 
       const btnEnviar = document.getElementById('btn-enviar-pedido');
-      const textoOriginal = btnEnviar.innerText;
       btnEnviar.innerText = "Gravando Pedido...";
       btnEnviar.disabled = true;
 
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
+
         await fetch(API_URL, {
           method: "POST",
-          redirect: "follow",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
             token: TOKEN_SISTEMA,
@@ -598,20 +599,18 @@
             total: `R$ ${total.toFixed(2)}`,
             endereco: endereco,
             pagamento: pagamento
-          })
+          }),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
       } catch (err) {
-        console.error("Aviso: Falha de rede ao gravar pedido na planilha:", err);
+        console.warn("Aviso na requisição:", err);
       }
 
       carrinho = {};
       fecharCheckout();
       renderizarCardapio();
 
-      btnEnviar.innerText = textoOriginal;
-      btnEnviar.disabled = false;
-      
-      // Redireciona para o WhatsApp
       window.location.href = urlWhatsapp;
     }
     carregarProdutos();
