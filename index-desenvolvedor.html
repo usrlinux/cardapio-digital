@@ -590,12 +590,14 @@
       
       const urlWhatsapp = `https://api.whatsapp.com/send?phone=${TELEFONE_EMPRESA}&text=${encodeURIComponent(textoMensagem)}`;
     
+      // Altera visualmente o botão para indicar processamento
       const btnEnviar = document.getElementById('btn-enviar-pedido');
-      const textoOriginal = btnEnviar.innerText;
+      const textoOriginal = btnEnviar.innerText; 
       btnEnviar.innerText = "Registrando Pedido...";
       btnEnviar.disabled = true;
     
       try {
+        // DISPARA O FETCH PARA GRAVAR E AGUARDA A RESPOSTA SÍNCRONA
         await fetch(API_URL, {
           method: "POST",
           redirect: "follow",
@@ -614,10 +616,12 @@
         console.error("Erro ao registrar pedido em segundo plano:", err);
       }
     
+      // Limpa o carrinho local e fecha o modal
       carrinho = {};
       fecharCheckout();
       renderizarCardapio();
     
+      // Restaura o botão e redireciona ao WhatsApp
       btnEnviar.innerText = textoOriginal;
       btnEnviar.disabled = false;
       window.location.href = urlWhatsapp;
