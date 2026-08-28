@@ -189,24 +189,39 @@
     let pizzaSelecionadaId = null;
     
     async function carregarProdutos() {
+      const container = document.getElementById('catalogo');
+      
+      try {
+        // Garante o envio do token correto seja em teste (?token=...) ou produção (CHAVE_SEGURANCA)
+        const tokenAtivo = TOKEN_SISTEMA || CHAVE_SEGURANCA;
+        const fetchUrl = `${API_URL}?token=${encodeURIComponent(tokenAtivo)}`;
     
-    try {
-        // Se for simulação de teste, passa o token dinâmico para buscar o cardápio do sandbox de demonstração
-        const fetchUrl = urlToken ? `${API_URL}?token=${encodeURIComponent(urlToken)}` : API_URL;
-        
         const res = await fetch(fetchUrl);
-        const data = await res.json();
+        if (!res.ok) throw new Error(`Status de resposta inválido: ${res.status}`);
         
-        if (data.produtos && data.whatsapp) {
+        const data = await res.json();
+    
+        // Tratamento flexível da estrutura de resposta
+        if (data && Array.isArray(data.produtos)) {
           produtos = data.produtos;
-          TELEFONE_EMPRESA = data.whatsapp.toString().replace(/\D/g, '');
-        } else {
+          if (data.whatsapp) {
+            TELEFONE_EMPRESA = data.whatsapp.toString().replace(/\D/g, '');
+          }
+        } else if (Array.isArray(data)) {
           produtos = data;
+        } else {
+          throw new Error("Formato de catálogo não reconhecido");
         }
-
+    
+        if (produtos.length === 0) {
+          container.innerHTML = '<p class="text-gray-500 text-center mt-8">Nenhum produto cadastrado no momento.</p>';
+          return;
+        }
+    
         renderizarCardapio();
       } catch (err) {
-        document.getElementById('catalogo').innerHTML = '<p class="text-red-500 text-center">Erro ao carregar cardápio.</p>';
+        console.error("Erro ao carregar cardápio:", err);
+        container.innerHTML = '<p class="text-red-500 text-center mt-8">Erro ao carregar cardápio. Tente novamente mais tarde.</p>';
       }
     }
 
