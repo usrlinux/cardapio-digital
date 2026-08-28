@@ -554,19 +554,15 @@
         fecharCheckout();
         return;
       }
-      if (!TELEFONE_EMPRESA) {
-        alert("Houve um atraso na conexão ao carregar o telefone do estabelecimento. Por favor, aguarde 2 segundos e tente novamente.");
-        return;
-      }
-      
-      const nome = document.getElementById('checkout-nome').value;
-      const endereco = document.getElementById('checkout-endereco').value;
+
+      const nome = document.getElementById('checkout-nome').value.trim();
+      const endereco = document.getElementById('checkout-endereco').value.trim();
       const pagamento = document.getElementById('checkout-pagamento').value;
-      
+
       localStorage.setItem('cliente_nome', nome);
       localStorage.setItem('cliente_endereco', endereco);
       localStorage.setItem('cliente_pagamento', pagamento);
-      
+
       let total = 0;
       const linhasItens = [];
       for (const [key, qtd] of Object.entries(carrinho)) {
@@ -576,32 +572,24 @@
           total += item.preco * qtd;
         }
       }
-      
+
       const itensFormatados = linhasItens.join('\n');
       const numeroPedido = gerarNumeroPedido();
+      const textoMensagem = `*PEDIDO ${numeroPedido}*\n-----------------------\n*Cliente:* ${nome}\n*Endereço:* ${endereco}\n*Pagamento:* ${pagamento}\n\n*Itens:*\n${itensFormatados}\n\n*Total:* R$ ${total.toFixed(2)}`;
       
-      const textoMensagem = `*PEDIDO ${numeroPedido}*\n` + 
-                            `-----------------------\n` + 
-                            `*Cliente:* ${nome}\n` + 
-                            `*Endereço:* ${endereco}\n` + 
-                            `*Pagamento:* ${pagamento}\n\n` + 
-                            `*Itens:*\n${itensFormatados}\n\n` + 
-                            `*Total:* R$ ${total.toFixed(2)}`;
-      
-      const urlWhatsapp = `https://api.whatsapp.com/send?phone=${TELEFONE_EMPRESA}&text=${encodeURIComponent(textoMensagem)}`;
-    
-      // Altera visualmente o botão para indicar processamento
+      const destinoWhatsapp = TELEFONE_EMPRESA || "5511999999999";
+      const urlWhatsapp = `https://api.whatsapp.com/send?phone=${destinoWhatsapp}&text=${encodeURIComponent(textoMensagem)}`;
+
       const btnEnviar = document.getElementById('btn-enviar-pedido');
-      const textoOriginal = btnEnviar.innerText; 
-      btnEnviar.innerText = "Registrando Pedido...";
+      const textoOriginal = btnEnviar.innerText;
+      btnEnviar.innerText = "Gravando Pedido...";
       btnEnviar.disabled = true;
-    
+
       try {
-        // DISPARA O FETCH PARA GRAVAR E AGUARDA A RESPOSTA SÍNCRONA
         await fetch(API_URL, {
           method: "POST",
-          redirect: "follow",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          mode: "no-cors", // Garante envio sem bloqueio de CORS pelo browser
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             token: TOKEN_SISTEMA,
             pedido: numeroPedido,
@@ -613,17 +601,17 @@
           })
         });
       } catch (err) {
-        console.error("Erro ao registrar pedido em segundo plano:", err);
+        console.error("Aviso: Falha de rede ao gravar pedido na planilha:", err);
       }
-    
-      // Limpa o carrinho local e fecha o modal
+
       carrinho = {};
       fecharCheckout();
       renderizarCardapio();
-    
-      // Restaura o botão e redireciona ao WhatsApp
+
       btnEnviar.innerText = textoOriginal;
       btnEnviar.disabled = false;
+      
+      // Redireciona para o WhatsApp
       window.location.href = urlWhatsapp;
     }
     carregarProdutos();
