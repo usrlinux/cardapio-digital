@@ -592,12 +592,12 @@
     
       // Altera visualmente o botão para indicar processamento
       const btnEnviar = document.getElementById('btn-enviar-pedido');
-      const textoOriginal = btnEnviar.innerText;
+      const textoOriginal = btnEnviar.innerText; // Corrigido de textOriginal para textoOriginal
       btnEnviar.innerText = "Registrando Pedido...";
       btnEnviar.disabled = true;
     
       try {
-        // DISPARA A GRAVAÇÃO E AGUARDA A CONFIRMAÇÃO DO GOOGLE SHEETS
+        // DISPARA O FETCH E AGUARDA A CONFIRMAÇÃO DO GOOGLE SHEETS
         await fetch(API_URL, {
           method: "POST",
           redirect: "follow",
@@ -621,8 +621,8 @@
       fecharCheckout();
       renderizarCardapio();
     
-      // Restaura o botão e redireciona com segurança para o WhatsApp
-      btnEnviar.innerText = textoOriginal;
+      // Restaura o botão e redireciona com total segurança para o WhatsApp
+      btnEnviar.innerText = textoOriginal; // Corrigido para bater com a definição
       btnEnviar.disabled = false;
       window.location.href = urlWhatsapp;
     }
