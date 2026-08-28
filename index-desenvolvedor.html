@@ -597,7 +597,7 @@
       btnEnviar.disabled = true;
     
       try {
-        // 1º DISPARA O FETCH E AGUARDA A RESPOSTA (Sincroniza antes do redirecionamento)
+        // DISPARA A GRAVAÇÃO E AGUARDA A CONFIRMAÇÃO DO GOOGLE SHEETS
         await fetch(API_URL, {
           method: "POST",
           redirect: "follow",
@@ -616,12 +616,12 @@
         console.error("Erro ao registrar pedido em segundo plano:", err);
       }
     
-      // 2º LIMPA O CARRINHO LOCAL E FECHA O MODAL
+      // Limpa o carrinho local e fecha o modal
       carrinho = {};
       fecharCheckout();
       renderizarCardapio();
     
-      // 3º RESTAURA O BOTÃO E REDIRECIONA PARA O WHATSAPP
+      // Restaura o botão e redireciona com segurança para o WhatsApp
       btnEnviar.innerText = textoOriginal;
       btnEnviar.disabled = false;
       window.location.href = urlWhatsapp;
