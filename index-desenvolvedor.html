@@ -1,279 +1,187 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cardápio Online</title>
+  <title>Cardápio Digital - Lanchonete Express</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    .animate-fade-in {
-      animation: fadeIn 0.2s ease-out forwards;
-    }
-    /* Evita que o usuário selecione/copie textos do catálogo facilmente */
-    body {
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-    }
-  </style>
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-gray-100 pb-32">
+
+<body class="bg-gray-100 pb-32 font-sans select-none text-gray-800">
 
   <!-- Header -->
   <header class="bg-red-600 text-white p-4 text-center sticky top-0 z-20 shadow-md">
-    <h1 class="text-xl font-bold">Lanchonete Express</h1>
-    <p class="text-xs text-red-100">Faça seu pedido online sem taxas</p>
+    <h1 class="text-xl font-black tracking-wide">Lanchonete Express</h1>
+    <p class="text-xs text-red-100 font-medium">Faça seu pedido online sem taxas</p>
   </header>
+
+  <!-- Banner de Acompanhar Pedido Ativo (se houver) -->
+  <div id="banner-acompanhar" class="max-w-md mx-auto px-4 pt-3 hidden">
+    <a id="link-status-banner" href="status.html" class="bg-amber-500 hover:bg-amber-600 text-amber-950 px-4 py-2.5 rounded-xl text-xs font-black shadow flex items-center justify-between transition-all">
+      <span class="flex items-center gap-2">
+        <i data-lucide="radar" class="w-4 h-4 animate-pulse"></i> Acompanhar meu pedido ativo
+      </span>
+      <i data-lucide="chevron-right" class="w-4 h-4"></i>
+    </a>
+  </div>
 
   <!-- Lista de Produtos agrupados por Categoria (Acordeão) -->
   <main class="max-w-md mx-auto p-4" id="catalogo">
-    <p class="text-center text-gray-500 mt-8">Carregando cardápio...</p>
+    <p class="text-center text-gray-500 mt-8 text-sm font-medium">Carregando cardápio...</p>
   </main>
 
-  <!-- Barra Fixa de Finalização (Carrinho) -->
+  <!-- Barra Fixa de Finalização (Rodapé) -->
   <div id="footer-carrinho" class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 shadow-2xl flex justify-between items-center max-w-md mx-auto hidden z-20">
     <div>
-      <span class="text-xs text-gray-500 block">Total:</span>
-      <span class="text-lg font-bold text-gray-900" id="total-carrinho">R$ 0,00</span>
+      <span class="text-xs text-gray-400 block font-bold">Total:</span>
+      <span class="text-lg font-black text-gray-900" id="total-carrinho">R$ 0,00</span>
     </div>
-    <button id="btn-finalizar" onclick="abrirCheckout()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-5 rounded-xl shadow active:scale-95 transition-all">
-      Ver Carrinho / Pedir
+    <button onclick="abrirModalCheckout()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 rounded-xl shadow active:scale-95 transition-all flex items-center gap-2">
+      <i data-lucide="shopping-bag" class="w-4 h-4"></i> Avançar Pedido
     </button>
   </div>
 
-  <!-- Modal de Montagem de Pizza Meio a Meio -->
-  <div id="modal-pizza" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl relative animate-fade-in">
-      <h3 class="text-lg font-bold text-gray-900 mb-4" id="modal-pizza-title">Montar Pizza Meio a Meio</h3>
-      
-      <div class="space-y-4">
-        <!-- Sabor 1 -->
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Primeiro Sabor (1/2)</label>
-          <select id="select-sabor1" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none focus:border-red-500 font-semibold text-gray-800">
-            <!-- Preenchido dinamicamente -->
-          </select>
-        </div>
-
-        <!-- Sabor 2 -->
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Segundo Sabor (1/2)</label>
-          <select id="select-sabor2" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none focus:border-red-500 font-semibold text-gray-800">
-            <!-- Preenchido dinamicamente -->
-          </select>
-        </div>
-      </div>
-
-      <!-- Rodapé do Modal -->
-      <div class="mt-6 flex gap-3">
-        <button onclick="fecharModalPizza()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-xl text-sm transition-all">
-          Cancelar
-        </button>
-        <button onclick="confirmarAdicionarPizza()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-sm transition-all">
-          Adicionar R$ <span id="modal-pizza-preco">0,00</span>
+  <!-- MODAL DE CHECKOUT ELEGANTE (UI/UX NATIVA MOBILE-FIRST) -->
+  <div id="modal-checkout" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-end sm:items-center justify-center hidden p-0 sm:p-4 transition-all">
+    <div class="bg-white rounded-t-3xl sm:rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="text-base font-black text-gray-900 flex items-center gap-2">
+          <i data-lucide="clipboard-check" class="text-red-600 w-5 h-5"></i> Finalizar Pedido
+        </h3>
+        <button type="button" onclick="fecharModalCheckout()" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
-    </div>
-  </div>
 
-  <!-- Modal de Checkout / Resumo do Pedido -->
-  <div id="modal-checkout" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl relative my-8 animate-fade-in">
-      <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Resumo do Pedido</h3>
-      
-      <!-- Itens do Carrinho -->
-      <div id="checkout-itens" class="space-y-3 max-h-48 overflow-y-auto mb-4 border-b pb-4">
-        <!-- Inserido dinamicamente -->
-      </div>
+      <form id="form-checkout" onsubmit="enviarPedido(event)" class="space-y-4">
+        
+        <!-- Tipo de Pedido: Delivery vs Retirada -->
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Como deseja receber?</label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="cursor-pointer">
+              <input type="radio" name="tipo_entrega" value="delivery" checked onchange="alternarTipoEntrega()" class="peer sr-only">
+              <div class="p-3 border-2 border-gray-200 rounded-xl peer-checked:border-red-600 peer-checked:bg-red-50 text-center transition-all flex flex-col items-center gap-1">
+                <i data-lucide="bike" class="w-5 h-5 text-gray-600 peer-checked:text-red-600"></i>
+                <span class="text-xs font-bold">Entrega (Delivery)</span>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="tipo_entrega" value="retirada" onchange="alternarTipoEntrega()" class="peer sr-only">
+              <div class="p-3 border-2 border-gray-200 rounded-xl peer-checked:border-red-600 peer-checked:bg-red-50 text-center transition-all flex flex-col items-center gap-1">
+                <i data-lucide="store" class="w-5 h-5 text-gray-600 peer-checked:text-red-600"></i>
+                <span class="text-xs font-bold">Retirar no Balcão</span>
+              </div>
+            </label>
+          </div>
+        </div>
 
-      <!-- Formulário do Cliente -->
-      <form id="form-checkout" onsubmit="enviarPedido(event)" class="space-y-3">
+        <!-- Nome do Cliente -->
         <div>
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Seu Nome</label>
-          <input type="text" id="checkout-nome" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none" placeholder="Ex: João Silva">
+          <input type="text" id="chk-nome" required placeholder="Ex: João Silva" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600">
         </div>
-        <div>
+
+        <!-- Campo Endereço (Oculto se for Retirada) -->
+        <div id="box-endereco">
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Endereço de Entrega</label>
-          <textarea id="checkout-endereco" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none" placeholder="Rua, Número, Bairro, Complemento" rows="2"></textarea>
+          <input type="text" id="chk-endereco" placeholder="Rua, Número, Bairro e Complemento" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600">
         </div>
+
+        <!-- Forma de Pagamento Discriminada -->
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Forma de Pagamento</label>
-          <select id="checkout-pagamento" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm focus:outline-none">
-            <option value="" disabled selected>Selecione...</option>
-            <option value="Pix">Pix</option>
-            <option value="Dinheiro">Dinheiro</option>
-            <option value="Cartão de Crédito">Cartão de Crédito</option>
-            <option value="Cartão de Débito">Cartão de Débito</option>
-          </select>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Forma de Pagamento</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="cursor-pointer">
+              <input type="radio" name="forma_pagamento" value="Pix" checked onchange="alternarFormaPagamento()" class="peer sr-only">
+              <div class="p-2.5 border-2 border-gray-200 rounded-xl peer-checked:border-red-600 peer-checked:bg-red-50 text-center transition-all">
+                <span class="text-xs font-bold block text-gray-700">⚡ Pix</span>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="forma_pagamento" value="Cartão de Débito" onchange="alternarFormaPagamento()" class="peer sr-only">
+              <div class="p-2.5 border-2 border-gray-200 rounded-xl peer-checked:border-red-600 peer-checked:bg-red-50 text-center transition-all">
+                <span class="text-xs font-bold block text-gray-700">💳 Débito</span>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="forma_pagamento" value="Cartão de Crédito" onchange="alternarFormaPagamento()" class="peer sr-only">
+              <div class="p-2.5 border-2 border-gray-200 rounded-xl peer-checked:border-red-600 peer-checked:bg-red-50 text-center transition-all">
+                <span class="text-xs font-bold block text-gray-700">💳 Crédito</span>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="forma_pagamento" value="Dinheiro" onchange="alternarFormaPagamento()" class="peer sr-only">
+              <div class="p-2.5 border-2 border-gray-200 rounded-xl peer-checked:border-red-600 peer-checked:bg-red-50 text-center transition-all">
+                <span class="text-xs font-bold block text-gray-700">💵 Dinheiro</span>
+              </div>
+            </label>
+          </div>
         </div>
 
-        <!-- Total e Envio -->
-        <div class="pt-2">
-          <div class="flex justify-between items-center mb-4 font-extrabold text-gray-950">
-            <span>Total a Pagar:</span>
-            <span id="checkout-total" class="text-lg text-green-700">R$ 0,00</span>
-          </div>
-          
-          <div class="flex gap-3">
-            <button type="button" onclick="fecharCheckout()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-xl text-sm transition-all">
-              Voltar
-            </button>
-            <button type="submit" id="btn-enviar-pedido" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-xl text-sm transition-all">
-              Pedir pelo WhatsApp
-            </button>
-          </div>
+        <!-- Campo Dinâmico de Troco (Apenas visível se Dinheiro for selecionado) -->
+        <div id="box-troco" class="hidden">
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Precisa de troco para quanto?</label>
+          <input type="text" id="chk-troco" placeholder="Ex: R$ 50,00 ou Não preciso" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600">
         </div>
 
-        <!-- Opção de Privacidade / Limpeza de Dados -->
-        <button type="button" onclick="limparDadosSalvos()" class="text-[10px] text-gray-400 hover:text-red-500 transition-colors text-center block w-full pt-2">
-          Limpar meus dados salvos neste celular
-        </button>
+        <!-- Campo de Observação -->
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Observações do Pedido (Opcional)</label>
+          <textarea id="chk-observacao" rows="2" placeholder="Ex: Sem cebola, molho à parte..." class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600"></textarea>
+        </div>
+
+        <!-- Resumo de Total e Botão Final -->
+        <div class="border-t pt-3 flex items-center justify-between">
+          <div>
+            <span class="text-xs text-gray-400 block font-bold">Total a pagar:</span>
+            <span class="text-lg font-black text-gray-900" id="chk-total-modal">R$ 0,00</span>
+          </div>
+          <button type="submit" id="btn-confirmar-pedido" class="bg-green-600 hover:bg-green-700 text-white font-extrabold py-3 px-6 rounded-xl shadow active:scale-95 transition-all flex items-center gap-2">
+            Confirmar Pedido <i data-lucide="check" class="w-4 h-4"></i>
+          </button>
+        </div>
       </form>
     </div>
   </div>
 
   <script>
-    // ================= SCRIPT DE ANTI-INSPEÇÃO (CURIOSOS) =================
-    // 1. Bloqueia Clique Direito
-    document.addEventListener('contextmenu', event => event.preventDefault());
-
-    // 2. Bloqueia Teclas de Atalhos de Dev
-    document.addEventListener('keydown', event => {
-      if (
-        event.key === 'F12' || 
-        (event.ctrlKey && event.shiftKey && (event.key === 'I' || event.key === 'J' || event.key === 'C')) || 
-        (event.ctrlKey && event.key === 'U')
-      ) {
-        event.preventDefault();
-        return false;
-      }
-    });
-    // ======================================================================
-
     const API_URL = "https://script.google.com/macros/s/AKfycbwiv1CzceVgKL3JOejjkHuwzhrChM9ZSkgKXU8Ee8axsBU9U0K53f7dzBLDfZPEuwU/exec";
 
-    // IMPORTANTE: Deve bater exatamente com a chave cadastrada no Apps Script!
-    const CHAVE_SEGURANCA = "LanchoneteExpress2026SecureToken";
-    
-    // Captura dinamicamente os parâmetros de teste da URL se houver (Ex: ?token=DEMO-1234)
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlToken = urlParams.get('token') || ""; 
-    const TOKEN_SISTEMA = urlToken || CHAVE_SEGURANCA;
-    
-    // Injeta dinamicamente o banner informativo sob o cabeçalho apenas se estiver em modo de simulação
-    if (urlToken) {
-      window.addEventListener('DOMContentLoaded', () => {
-        const header = document.querySelector('header');
-        if (header) {
-          const banner = document.createElement('div');
-          banner.className = "bg-amber-500 text-amber-950 p-2.5 text-center text-xs font-black border-b border-amber-600 shadow-inner select-none";
-          banner.innerText = "⚠️ MODO DE TESTES SIMULADO - EXCLUSIVO POR 1 HORA";
-          header.insertAdjacentElement('afterend', banner);
-        }
-      });
-    }
-    
-    let TELEFONE_EMPRESA = "";
-    
     let produtos = [];
-    
     let carrinho = {};
-    
     const categoriasAbertas = new Set();
-    
-    let pizzaSelecionadaId = null;
-    
+
+    function verificarPedidoAtivo() {
+      const pedSalvo = localStorage.getItem('ultimo_pedido_id');
+      if (pedSalvo) {
+        document.getElementById('banner-acompanhar').classList.remove('hidden');
+        document.getElementById('link-status-banner').href = `status.html?p=${encodeURIComponent(pedSalvo)}`;
+      }
+    }
+
     async function carregarProdutos() {
-      const container = document.getElementById('catalogo');
-      
       try {
-        // Garante o envio do token correto seja em teste (?token=...) ou produção (CHAVE_SEGURANCA)
-        const tokenAtivo = TOKEN_SISTEMA || CHAVE_SEGURANCA;
-        const fetchUrl = `${API_URL}?token=${encodeURIComponent(tokenAtivo)}`;
-    
-        const res = await fetch(fetchUrl);
-        if (!res.ok) throw new Error(`Status de resposta inválido: ${res.status}`);
-        
+        const res = await fetch(API_URL);
         const data = await res.json();
-    
-        // Tratamento flexível da estrutura de resposta
-        if (data && Array.isArray(data.produtos)) {
-          produtos = data.produtos;
-          if (data.whatsapp) {
-            TELEFONE_EMPRESA = data.whatsapp.toString().replace(/\D/g, '');
-          }
-        } else if (Array.isArray(data)) {
-          produtos = data;
-        } else {
-          throw new Error("Formato de catálogo não reconhecido");
-        }
-    
-        if (produtos.length === 0) {
-          container.innerHTML = '<p class="text-gray-500 text-center mt-8">Nenhum produto cadastrado no momento.</p>';
-          return;
-        }
-    
+        produtos = data.produtos || data || [];
         renderizarCardapio();
       } catch (err) {
-        console.error("Erro ao carregar cardápio:", err);
-        container.innerHTML = '<p class="text-red-500 text-center mt-8">Erro ao carregar cardápio. Tente novamente mais tarde.</p>';
+        document.getElementById('catalogo').innerHTML = '<p class="text-red-500 text-center font-bold">Erro ao carregar cardápio.</p>';
       }
     }
 
     function toggleCategoria(categoria, estaAberto) {
-      if (estaAberto) {
-        categoriasAbertas.add(categoria);
-      } else {
-        categoriasAbertas.delete(categoria);
-      }
-    }
-
-    function isPizza(p) {
-      if (!p || !p.categoria) return false;
-      const cat = p.categoria.trim().toLowerCase();
-      return cat === "pizza" || cat === "pizzas";
-    }
-
-    function obterItemCarrinho(key) {
-      if (key.startsWith("pizza_")) {
-        const parts = key.split("_");
-        const id1 = parts[1];
-        const id2 = parts[2];
-        const p1 = produtos.find(p => p.id == id1);
-        const p2 = produtos.find(p => p.id == id2);
-        
-        if (p1 && p2) {
-          const preco = Math.max(Number(p1.preco), Number(p2.preco));
-          const nome1 = p1.nome.replace(/^[Pp]izza\s+/, "");
-          const nome2 = p2.nome.replace(/^[Pp]izza\s+/, "");
-          return {
-            key,
-            nome: `Pizza 1/2 ${nome1} / 1/2 ${nome2}`,
-            preco: preco
-          };
-        }
-      } else {
-        const prod = produtos.find(p => p.id == key);
-        if (prod) {
-          return {
-            key,
-            nome: prod.nome,
-            preco: Number(prod.preco)
-          };
-        }
-      }
-      return null;
+      if (estaAberto) categoriasAbertas.add(categoria);
+      else categoriasAbertas.delete(categoria);
     }
 
     function renderizarCardapio() {
       const container = document.getElementById('catalogo');
-      
-      const categories = produtos.reduce((acc, p) => {
+
+      const categorias = produtos.reduce((acc, p) => {
         const cat = p.categoria || "Outros";
         if (!acc[cat]) acc[cat] = [];
         acc[cat].push(p);
@@ -282,19 +190,19 @@
 
       let html = '';
 
-      for (const [categoria, itens] of Object.entries(categories)) {
+      for (const [categoria, itens] of Object.entries(categorias)) {
         const isOpen = categoriasAbertas.has(categoria) ? 'open' : '';
         const catEscapada = categoria.replace(/'/g, "\\'");
 
         html += `
-          <details ${isOpen} ontoggle="toggleCategoria('${catEscapada}', this.open)" class="group mb-4 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <details ${isOpen} ontoggle="toggleCategoria('${catEscapada}', this.open)" class="group mb-4 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <summary class="flex justify-between items-center p-3.5 font-bold text-gray-800 cursor-pointer select-none bg-gray-50 hover:bg-gray-100 transition-colors list-none">
               <div class="flex items-center gap-2">
                 <span class="w-1.5 h-5 bg-red-600 rounded-full"></span>
                 <span class="text-base font-extrabold">${categoria}</span>
-                <span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full font-medium">${itens.length}</span>
+                <span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full font-bold">${itens.length}</span>
               </div>
-              <svg class="w-5 h-5 text-gray-500 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
               </svg>
             </summary>
@@ -302,36 +210,21 @@
             <div class="p-3 space-y-3 border-t border-gray-100">
               ${itens.map(p => {
                 const qtd = carrinho[p.id] || 0;
-                const ePizza = isPizza(p);
                 return `
                   <div class="bg-white rounded-xl border border-gray-100 p-3 flex gap-3 items-center hover:border-gray-300 transition-colors">
-                    <img src="${p.imagem || 'https://placehold.co/100'}" class="w-20 h-20 object-cover rounded-lg bg-gray-50 flex-shrink-0">
+                    <img src="${p.imagem || 'https://placehold.co/100'}" class="w-20 h-20 object-cover rounded-xl bg-gray-50 flex-shrink-0">
                     <div class="flex-1 min-w-0">
-                      <h3 class="font-bold text-gray-800 text-sm truncate">${p.nome}</h3>
-                      <p class="text-xs text-gray-500 line-clamp-2 mt-0.5">${p.descricao}</p>
-                      <span class="text-green-700 font-bold text-sm block mt-1">R$ ${Number(p.preco).toFixed(2)}</span>
+                      <h3 class="font-extrabold text-gray-800 text-sm truncate">${p.nome}</h3>
+                      <p class="text-xs text-gray-400 line-clamp-2 mt-0.5 font-medium">${p.descricao}</p>
+                      <span class="text-green-700 font-black text-sm block mt-1">R$ ${Number(p.preco).toFixed(2)}</span>
                     </div>
                     
-                    <div class="flex flex-col items-end gap-2 flex-shrink-0">
-                      <!-- Controles de Quantidade (Sabor Único) -->
-                      <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-lg border border-gray-200">
-                        ${qtd > 0 ? `
-                          <button onclick="alterarQtd(${p.id}, -1)" class="w-7 h-7 bg-red-100 text-red-600 rounded-md font-bold text-sm flex items-center justify-center active:scale-90 transition-transform">
-                            -
-                          </button>
-                          <span class="text-xs font-bold text-gray-800 w-4 text-center">${qtd}</span>
-                        ` : ''}
-                        <button onclick="alterarQtd(${p.id}, 1)" class="w-7 h-7 bg-red-600 text-white rounded-md font-bold text-sm flex items-center justify-center active:scale-90 transition-transform">
-                          +
-                        </button>
-                      </div>
-                      
-                      <!-- Botão Meio a Meio (Aparece apenas nas pizzas) -->
-                      ${ePizza ? `
-                        <button onclick="abrirModalPizza(${p.id})" class="text-[11px] bg-amber-500 hover:bg-amber-600 text-white font-extrabold py-1 px-2.5 rounded-lg shadow-sm active:scale-95 transition-all">
-                          Meio a Meio
-                        </button>
+                    <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-xl border border-gray-200 flex-shrink-0">
+                      ${qtd > 0 ? `
+                        <button onclick="alterarQtd(${p.id}, -1)" class="w-7 h-7 bg-red-100 text-red-600 rounded-lg font-black text-sm flex items-center justify-center active:scale-90 transition-transform">-</button>
+                        <span class="text-xs font-black text-gray-800 w-4 text-center">${qtd}</span>
                       ` : ''}
+                      <button onclick="alterarQtd(${p.id}, 1)" class="w-7 h-7 bg-red-600 text-white rounded-lg font-black text-sm flex items-center justify-center active:scale-90 transition-transform">+</button>
                     </div>
                   </div>
                 `;
@@ -343,292 +236,140 @@
 
       container.innerHTML = html;
       atualizarBarra();
+      lucide.createIcons();
     }
 
     function alterarQtd(id, delta) {
-      const key = id.toString();
-      const prod = produtos.find(p => p.id == id);
-      if (!prod) return;
-
-      const atual = carrinho[key] || 0;
+      const atual = carrinho[id] || 0;
       const novaQtd = atual + delta;
-
-      if (novaQtd > 0) {
-        carrinho[key] = novaQtd;
-      } else {
-        delete carrinho[key];
-      }
-
+      if (novaQtd > 0) carrinho[id] = novaQtd;
+      else delete carrinho[id];
       renderizarCardapio();
     }
 
-    /* SISTEMA DE PIZZA MEIO A MEIO (MODAL) */
-    function abrirModalPizza(id) {
-      pizzaSelecionadaId = id;
-      
-      const prod = produtos.find(p => p.id == id);
-      if (!prod) return;
-
-      const pizzasDisponiveis = produtos.filter(p => isPizza(p));
-      
-      const select1 = document.getElementById('select-sabor1');
-      select1.innerHTML = pizzasDisponiveis.map(p => `
-        <option value="${p.id}" ${p.id == id ? 'selected' : ''}>${p.nome} - R$ ${Number(p.preco).toFixed(2)}</option>
-      `).join('');
-      
-      const select2 = document.getElementById('select-sabor2');
-      select2.innerHTML = pizzasDisponiveis.map(p => `
-        <option value="${p.id}">${p.nome} - R$ ${Number(p.preco).toFixed(2)}</option>
-      `).join('');
-
-      document.getElementById('modal-pizza').classList.remove('hidden');
-      atualizarPrecoModal();
-    }
-
-    function fecharModalPizza() {
-      document.getElementById('modal-pizza').classList.add('hidden');
-    }
-
-    function atualizarPrecoModal() {
-      const idSabor1 = document.getElementById('select-sabor1').value;
-      const idSabor2 = document.getElementById('select-sabor2').value;
-      
-      const p1 = produtos.find(p => p.id == idSabor1);
-      const p2 = produtos.find(p => p.id == idSabor2);
-      
-      if (p1 && p2) {
-        const precoFinal = Math.max(Number(p1.preco), Number(p2.preco));
-        document.getElementById('modal-pizza-preco').innerText = precoFinal.toFixed(2);
+    function obterTotalCarrinho() {
+      let total = 0;
+      for (const [id, qtd] of Object.entries(carrinho)) {
+        const prod = produtos.find(p => p.id == id);
+        if (prod) total += Number(prod.preco) * qtd;
       }
+      return total;
     }
 
-    document.getElementById('select-sabor1').addEventListener('change', atualizarPrecoModal);
-    document.getElementById('select-sabor2').addEventListener('change', atualizarPrecoModal);
-
-    function confirmarAdicionarPizza() {
-      const idSabor1 = document.getElementById('select-sabor1').value;
-      const idSabor2 = document.getElementById('select-sabor2').value;
-      
-      if (idSabor1 === idSabor2) {
-        const key = idSabor1.toString();
-        carrinho[key] = (carrinho[key] || 0) + 1;
-      } else {
-        const saboresOrdenados = [idSabor1, idSabor2].sort((a, b) => Number(a) - Number(b));
-        const key = `pizza_${saboresOrdenados[0]}_${saboresOrdenados[1]}`;
-        carrinho[key] = (carrinho[key] || 0) + 1;
-      }
-
-      fecharModalPizza();
-      renderizarCardapio();
-    }
-
-    /* SISTEMA DE ATUALIZAÇÃO DO CARRINHO E CHECKOUT */
     function atualizarBarra() {
-      let total = 0;
-      let totalItens = 0;
+      const total = obterTotalCarrinho();
+      const totalFormatado = `R$ ${total.toFixed(2)}`;
+      document.getElementById('total-carrinho').innerText = totalFormatado;
+      document.getElementById('chk-total-modal').innerText = totalFormatado;
 
-      for (const [key, qtd] of Object.entries(carrinho)) {
-        const item = obterItemCarrinho(key);
-        if (item) {
-          total += item.preco * qtd;
-          totalItens += qtd;
-        }
-      }
-
-      document.getElementById('total-carrinho').innerText = `R$ ${total.toFixed(2)}`;
-      
       const footer = document.getElementById('footer-carrinho');
-      if (totalItens > 0) {
-        footer.classList.remove('hidden');
-      } else {
-        footer.classList.add('hidden');
-      }
+      if (total > 0) footer.classList.remove('hidden');
+      else footer.classList.add('hidden');
     }
 
-    function carregarDadosCliente() {
-      const nomeSalvo = localStorage.getItem('cliente_nome');
-      const enderecoSalvo = localStorage.getItem('cliente_endereco');
-      const pagamentoSalvo = localStorage.getItem('cliente_pagamento');
-
-      if (nomeSalvo) {
-        document.getElementById('checkout-nome').value = nomeSalvo;
-      }
-      if (enderecoSalvo) {
-        document.getElementById('checkout-endereco').value = enderecoSalvo;
-      }
-      if (pagamentoSalvo) {
-        document.getElementById('checkout-pagamento').value = pagamentoSalvo;
-      }
-    }
-
-    function limparDadosSalvos() {
-      if (confirm("Deseja realmente apagar seus dados de entrega salvos neste aparelho?")) {
-        localStorage.removeItem('cliente_nome');
-        localStorage.removeItem('cliente_endereco');
-        localStorage.removeItem('cliente_pagamento');
-        
-        document.getElementById('checkout-nome').value = '';
-        document.getElementById('checkout-endereco').value = '';
-        document.getElementById('checkout-pagamento').selectedIndex = 0;
-        
-        alert("Dados limpos com sucesso!");
-      }
-    }
-
-    function abrirCheckout() {
-      const container = document.getElementById('checkout-itens');
-      let total = 0;
-      let html = '';
-
-      const itensValidos = [];
-
-      for (const [key, qtd] of Object.entries(carrinho)) {
-        const item = obterItemCarrinho(key);
-        if (item) {
-          total += item.preco * qtd;
-          itensValidos.push({ ...item, qtd });
-        }
-      }
-
-      if (itensValidos.length === 0) {
-        fecharCheckout();
-        return;
-      }
-
-      html = itensValidos.map(item => `
-        <div class="flex justify-between items-center gap-2 py-2 border-b border-gray-100 last:border-0">
-          <div class="flex-1 min-w-0">
-            <p class="font-bold text-gray-800 text-sm truncate">${item.nome}</p>
-            <p class="text-xs text-gray-500">R$ ${item.preco.toFixed(2)} un.</p>
-          </div>
-          
-          <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-lg border border-gray-200 flex-shrink-0">
-            <button type="button" onclick="alterarQtdCarrinho('${item.key}', -1)" class="w-6 h-6 bg-red-100 text-red-600 rounded-md font-bold text-xs flex items-center justify-center active:scale-90 transition-transform">
-              -
-            </button>
-            <span class="text-xs font-bold text-gray-800 w-4 text-center">${item.qtd}</span>
-            <button type="button" onclick="alterarQtdCarrinho('${item.key}', 1)" class="w-6 h-6 bg-red-600 text-white rounded-md font-bold text-xs flex items-center justify-center active:scale-90 transition-transform">
-              +
-            </button>
-          </div>
-        </div>
-      `).join('');
-
-      container.innerHTML = html;
-      document.getElementById('checkout-total').innerText = `R$ ${total.toFixed(2)}`;
-      
-      carregarDadosCliente();
-
+    function abrirModalCheckout() {
       document.getElementById('modal-checkout').classList.remove('hidden');
+      alternarTipoEntrega();
+      alternarFormaPagamento();
+      lucide.createIcons();
     }
 
-    function alterarQtdCarrinho(key, delta) {
-      const atual = carrinho[key] || 0;
-      const novaQtd = atual + delta;
-
-      if (novaQtd > 0) {
-        carrinho[key] = novaQtd;
-      } else {
-        delete carrinho[key];
-      }
-
-      renderizarCardapio();
-      
-      let totalItens = 0;
-      for (const [k, q] of Object.entries(carrinho)) {
-        if (obterItemCarrinho(k)) totalItens += q;
-      }
-
-      if (totalItens === 0) {
-        fecharCheckout();
-      } else {
-        abrirCheckout();
-      }
-    }
-
-    function fecharCheckout() {
+    function fecharModalCheckout() {
       document.getElementById('modal-checkout').classList.add('hidden');
     }
 
-    function gerarNumeroPedido() {
-      const agora = new Date();
-      const dia = String(agora.getDate()).padStart(2, '0');
-      const mes = String(agora.getMonth() + 1).padStart(2, '0');
-      const aleatorio = Math.floor(1000 + Math.random() * 9000); 
-      return `#${dia}${mes}-${aleatorio}`;
+    function alternarTipoEntrega() {
+      const tipo = document.querySelector('input[name="tipo_entrega"]:checked').value;
+      const boxEndereco = document.getElementById('box-endereco');
+      const inputEndereco = document.getElementById('chk-endereco');
+
+      if (tipo === 'retirada') {
+        boxEndereco.classList.add('hidden');
+        inputEndereco.removeAttribute('required');
+      } else {
+        boxEndereco.classList.remove('hidden');
+        inputEndereco.setAttribute('required', 'true');
+      }
+    }
+
+    function alternarFormaPagamento() {
+      const forma = document.querySelector('input[name="forma_pagamento"]:checked').value;
+      const boxTroco = document.getElementById('box-troco');
+      if (forma === 'Dinheiro') {
+        boxTroco.classList.remove('hidden');
+      } else {
+        boxTroco.classList.add('hidden');
+      }
     }
 
     async function enviarPedido(event) {
       event.preventDefault();
-      let totalItens = 0;
-      for (const [k, q] of Object.entries(carrinho)) {
-        if (obterItemCarrinho(k)) totalItens += q;
-      }
-      if (totalItens === 0) {
-        alert("Seu carrinho está vazio!");
-        fecharCheckout();
-        return;
-      }
 
-      const nome = document.getElementById('checkout-nome').value.trim();
-      const endereco = document.getElementById('checkout-endereco').value.trim();
-      const pagamento = document.getElementById('checkout-pagamento').value;
+      const btn = document.getElementById('btn-confirmar-pedido');
+      btn.innerText = "Processando Pedido...";
+      btn.disabled = true;
 
-      localStorage.setItem('cliente_nome', nome);
-      localStorage.setItem('cliente_endereco', endereco);
-      localStorage.setItem('cliente_pagamento', pagamento);
+      const nome = document.getElementById('chk-nome').value.trim();
+      const tipo = document.querySelector('input[name="tipo_entrega"]:checked').value;
+      const endereco = tipo === 'retirada' ? "🥡 Retirada no Balcão" : document.getElementById('chk-endereco').value.trim();
+      const formaPgto = document.querySelector('input[name="forma_pagamento"]:checked').value;
+      const troco = formaPgto === 'Dinheiro' ? document.getElementById('chk-troco').value.trim() : "";
+      const obs = document.getElementById('chk-observacao').value.trim();
 
       let total = 0;
       const linhasItens = [];
-      for (const [key, qtd] of Object.entries(carrinho)) {
-        const item = obterItemCarrinho(key);
-        if (item) {
-          linhasItens.push(`• ${qtd}x ${item.nome}`);
-          total += item.preco * qtd;
+      for (const [id, qtd] of Object.entries(carrinho)) {
+        const prod = produtos.find(p => p.id == id);
+        if (prod) {
+          linhasItens.push(`• ${qtd}x ${prod.nome}`);
+          total += Number(prod.preco) * qtd;
         }
       }
 
+      const totalFormatado = `R$ ${total.toFixed(2)}`;
       const itensFormatados = linhasItens.join('\n');
-      const numeroPedido = gerarNumeroPedido();
-      const textoMensagem = `*PEDIDO ${numeroPedido}*\n-----------------------\n*Cliente:* ${nome}\n*Endereço:* ${endereco}\n*Pagamento:* ${pagamento}\n\n*Itens:*\n${itensFormatados}\n\n*Total:* R$ ${total.toFixed(2)}`;
-      
-      const destinoWhatsapp = TELEFONE_EMPRESA || "5511999999999";
-      const urlWhatsapp = `https://api.whatsapp.com/send?phone=${destinoWhatsapp}&text=${encodeURIComponent(textoMensagem)}`;
-
-      const btnEnviar = document.getElementById('btn-enviar-pedido');
-      btnEnviar.innerText = "Gravando Pedido...";
-      btnEnviar.disabled = true;
+      const idTemp = "#" + Math.floor(1000 + Math.random() * 9000);
 
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        const payload = JSON.stringify({
+          pedido: idTemp,
+          cliente: nome,
+          itens: itensFormatados,
+          total: totalFormatado,
+          endereco: endereco,
+          pagamento: formaPgto,
+          trocoPara: troco,
+          tipoEntrega: tipo,
+          observacao: obs
+        });
 
-        await fetch(API_URL, {
+        const res = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            token: TOKEN_SISTEMA,
-            pedido: numeroPedido,
-            cliente: nome,
-            itens: itensFormatados,
-            total: `R$ ${total.toFixed(2)}`,
-            endereco: endereco,
-            pagamento: pagamento
-          }),
-          signal: controller.signal
+          body: payload
         });
-        clearTimeout(timeoutId);
+
+        const resposta = await res.json();
+        const idFinal = (resposta && resposta.pedido) ? resposta.pedido : idTemp;
+
+        // Salva localmente para acesso imediato com 1 clique
+        localStorage.setItem('ultimo_pedido_id', idFinal);
+        carrinho = {};
+
+        // REDIRECIONA DIRETO PARA MONITORAMENTO DE STATUS (SEM ABRIR WHATSAPP FORÇADO)
+        window.location.href = `status.html?p=${encodeURIComponent(idFinal)}`;
+
       } catch (err) {
-        console.warn("Aviso na requisição:", err);
+        console.error("Erro ao processar pedido:", err);
+        alert("Erro de conexão ao enviar o pedido. Tente novamente.");
+        btn.innerText = "Confirmar Pedido";
+        btn.disabled = false;
       }
-
-      carrinho = {};
-      fecharCheckout();
-      renderizarCardapio();
-
-      window.location.href = urlWhatsapp;
     }
+
+    verificarPedidoAtivo();
     carregarProdutos();
   </script>
 </body>
+
 </html>
