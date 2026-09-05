@@ -14,10 +14,10 @@
   <!-- Header -->
   <header class="bg-red-600 text-white p-4 text-center sticky top-0 z-20 shadow-md">
     <h1 class="text-xl font-black tracking-wide">Lanchonete Express</h1>
-    <p class="text-xs text-red-100 font-medium">Faça seu pedido online de forma rápida e prática</p>
+    <p class="text-xs text-red-100 font-medium">Faça seu pedido online sem taxas</p>
   </header>
 
-  <!-- Banner de Acompanhar Pedido Ativo (Apenas se não estiver Concluído/Cancelado) -->
+  <!-- Banner de Acompanhar Pedido Ativo -->
   <div id="banner-acompanhar" class="max-w-md mx-auto px-4 pt-3 hidden">
     <a id="link-status-banner" href="status.html" class="bg-amber-500 hover:bg-amber-600 text-amber-950 px-4 py-2.5 rounded-xl text-xs font-black shadow flex items-center justify-between transition-all">
       <span class="flex items-center gap-2">
@@ -119,15 +119,15 @@
           <input type="text" id="chk-nome" required placeholder="Ex: João Silva" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600">
         </div>
 
-        <!-- Campo Endereço (Oculto se for Retirada) -->
+        <!-- Bloco de Endereço (Apenas se for Delivery) -->
         <div id="box-endereco">
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Endereço de Entrega</label>
           <input type="text" id="chk-endereco" placeholder="Rua, Número, Bairro e Complemento" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600">
         </div>
 
-        <!-- Forma de Pagamento Discriminada -->
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Forma de Pagamento</label>
+        <!-- Bloco de Forma de Pagamento (Apenas se for Delivery) -->
+        <div id="box-pagamento-completo">
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Forma de Pagamento na Entrega</label>
           <div class="grid grid-cols-2 gap-2">
             <label class="cursor-pointer">
               <input type="radio" name="forma_pagamento" value="Pix" checked onchange="alternarFormaPagamento()" class="peer sr-only">
@@ -154,12 +154,18 @@
               </div>
             </label>
           </div>
+
+          <!-- Campo Dinâmico de Troco -->
+          <div id="box-troco" class="hidden mt-3">
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Precisa de troco para quanto?</label>
+            <input type="text" id="chk-troco" placeholder="Ex: R$ 50,00 ou Não preciso" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600">
+          </div>
         </div>
 
-        <!-- Campo Dinâmico de Troco -->
-        <div id="box-troco" class="hidden">
-          <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Precisa de troco para quanto?</label>
-          <input type="text" id="chk-troco" placeholder="Ex: R$ 50,00 ou Não preciso" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600">
+        <!-- Aviso para Retirada no Balcão -->
+        <div id="box-aviso-retirada" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900">
+          <p class="font-bold">🥡 Pagamento direto no balcão da loja.</p>
+          <p class="text-[11px] text-amber-700 mt-0.5">Você efetua o pagamento no momento em que for retirar o seu pedido.</p>
         </div>
 
         <!-- Campo de Observação -->
@@ -186,10 +192,9 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbwiv1CzceVgKL3JOejjkHuwzhrChM9ZSkgKXU8Ee8axsBU9U0K53f7dzBLDfZPEuwU/exec";
 
     let produtos = [];
-    let carrinho = {}; // Chave pode ser id numérico ou string como "meio_10_11"
+    let carrinho = {};
     const categoriasAbertas = new Set();
 
-    // Valida se o pedido ativo ainda está em andamento. Se concluído ou cancelado, remove o banner.
     async function verificarPedidoAtivo() {
       const pedSalvo = localStorage.getItem('ultimo_pedido_id');
       if (!pedSalvo) {
@@ -306,7 +311,6 @@
         `;
       }
 
-      // Se houver pizzas meio a meio no carrinho, renderiza card com elas
       const pizzasMeio = Object.entries(carrinho).filter(([k]) => k.startsWith("meio_"));
       if (pizzasMeio.length > 0) {
         html += `
@@ -339,7 +343,6 @@
       lucide.createIcons();
     }
 
-    // Modal de Pizza Meio a Meio
     function abrirModalPizza() {
       const pizzasDisponiveis = produtos.filter(p => ehCategoriaPizza(p.categoria));
       if (pizzasDisponiveis.length < 2) {
@@ -445,7 +448,6 @@
     function abrirModalCheckout() {
       document.getElementById('modal-checkout').classList.remove('hidden');
       alternarTipoEntrega();
-      alternarFormaPagamento();
       lucide.createIcons();
     }
 
@@ -457,18 +459,33 @@
       const tipo = document.querySelector('input[name="tipo_entrega"]:checked').value;
       const boxEndereco = document.getElementById('box-endereco');
       const inputEndereco = document.getElementById('chk-endereco');
+      const boxPagamento = document.getElementById('box-pagamento-completo');
+      const boxAvisoRetirada = document.getElementById('box-aviso-retirada');
 
       if (tipo === 'retirada') {
+        // Oculta endereço e não exige preenchimento
         boxEndereco.classList.add('hidden');
         inputEndereco.removeAttribute('required');
+        inputEndereco.value = "";
+
+        // Oculta bloco de pagamento (paga direto no balcão)
+        boxPagamento.classList.add('hidden');
+        boxAvisoRetirada.classList.remove('hidden');
       } else {
+        // Exibe endereço
         boxEndereco.classList.remove('hidden');
         inputEndereco.setAttribute('required', 'true');
+
+        // Exibe bloco de pagamento
+        boxPagamento.classList.remove('hidden');
+        boxAvisoRetirada.classList.add('hidden');
+        alternarFormaPagamento();
       }
     }
 
     function alternarFormaPagamento() {
-      const forma = document.querySelector('input[name="forma_pagamento"]:checked').value;
+      const checkedPgto = document.querySelector('input[name="forma_pagamento"]:checked');
+      const forma = checkedPgto ? checkedPgto.value : "Pix";
       const boxTroco = document.getElementById('box-troco');
       if (forma === 'Dinheiro') {
         boxTroco.classList.remove('hidden');
@@ -487,8 +504,16 @@
       const nome = document.getElementById('chk-nome').value.trim();
       const tipo = document.querySelector('input[name="tipo_entrega"]:checked').value;
       const endereco = tipo === 'retirada' ? "🥡 Retirada no Balcão" : document.getElementById('chk-endereco').value.trim();
-      const formaPgto = document.querySelector('input[name="forma_pagamento"]:checked').value;
-      const troco = formaPgto === 'Dinheiro' ? document.getElementById('chk-troco').value.trim() : "";
+      
+      let formaPgto = "Acerto no Balcão";
+      let troco = "";
+
+      if (tipo === 'delivery') {
+        const checkedPgto = document.querySelector('input[name="forma_pagamento"]:checked');
+        formaPgto = checkedPgto ? checkedPgto.value : "Pix";
+        troco = formaPgto === 'Dinheiro' ? document.getElementById('chk-troco').value.trim() : "";
+      }
+
       const obs = document.getElementById('chk-observacao').value.trim();
 
       let total = 0;
@@ -525,11 +550,9 @@
         const resposta = await res.json();
         const idFinal = (resposta && resposta.pedido) ? resposta.pedido : idTemp;
 
-        // Salva na memória local para acesso imediato
         localStorage.setItem('ultimo_pedido_id', idFinal);
         carrinho = {};
 
-        // Redireciona diretamente para o status
         window.location.href = `status.html?p=${encodeURIComponent(idFinal)}`;
 
       } catch (err) {
