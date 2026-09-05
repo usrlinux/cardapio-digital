@@ -66,7 +66,7 @@
       </div>
     </div>
 
-    <!-- Botão de Cancelamento Restrito (Exclusivo para Pendente) -->
+    <!-- Botão de Cancelamento (ESTRITAMENTE SE O STATUS FOR PENDENTE) -->
     <div id="box-cancelamento" class="hidden">
       <button onclick="confirmarCancelamento()" class="w-full bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all">
         <i data-lucide="x-circle" class="w-4 h-4"></i> Cancelar meu Pedido
@@ -74,10 +74,10 @@
       <p class="text-[10px] text-gray-400 text-center mt-1 font-medium">Disponível apenas enquanto a cozinha não iniciou o preparo.</p>
     </div>
 
-    <!-- Aviso quando o cancelamento é desativado -->
+    <!-- Aviso quando o cancelamento é bloqueado -->
     <div id="aviso-preparo" class="hidden bg-blue-50 text-blue-800 border border-blue-200 p-3 rounded-xl text-xs flex items-start gap-2">
       <i data-lucide="info" class="w-4 h-4 flex-shrink-0 mt-0.5"></i>
-      <span>Seu pedido já começou a ser preparado! Em caso de imprevisto urgente, contate a loja pelo botão de WhatsApp abaixo.</span>
+      <span>Seu pedido já começou a ser preparado ou foi finalizado. Para qualquer suporte, contate a loja no WhatsApp.</span>
     </div>
 
     <!-- Detalhes do Pedido -->
@@ -90,8 +90,8 @@
         Carregando itens...
       </div>
       <div class="text-xs text-gray-500 space-y-1">
-        <div><strong>Entrega / Retirada:</strong> <span id="detalhes-endereco">-</span></div>
-        <div><strong>Pagamento:</strong> <span id="detalhes-pagamento">-</span></div>
+        <div><strong>Tipo:</strong> <span id="detalhes-endereco">-</span></div>
+        <div id="box-info-pagamento"><strong>Pagamento:</strong> <span id="detalhes-pagamento">-</span></div>
       </div>
       <div class="flex justify-between items-center pt-2 border-t font-extrabold text-sm">
         <span>Total:</span>
@@ -127,6 +127,8 @@
       if (!idPedido) {
         document.getElementById('titulo-status').innerText = "Nenhum Pedido Ativo";
         document.getElementById('subtitulo-status').innerText = "Você não possui pedidos ativos no momento.";
+        document.getElementById('box-cancelamento').classList.add('hidden');
+        document.getElementById('aviso-preparo').classList.add('hidden');
         return;
       }
 
@@ -144,7 +146,7 @@
           aplicarStatusNaTela(dados);
         } else {
           document.getElementById('titulo-status').innerText = "Pedido em Processamento";
-          document.getElementById('subtitulo-status').innerText = "Aguardando confirmação inicial da cozinha...";
+          document.getElementById('subtitulo-status').innerText = "Aguardando confirmação da cozinha...";
         }
       } catch (err) {
         console.error("Erro ao consultar status:", err);
@@ -164,12 +166,18 @@
       document.getElementById('detalhes-itens').innerText = dados.itens || "Nenhum item.";
       document.getElementById('detalhes-total').innerText = dados.total || "R$ 0,00";
       document.getElementById('detalhes-endereco').innerText = dados.endereco || "-";
-      document.getElementById('detalhes-pagamento').innerText = dados.pagamento || "-";
 
       const status = (dados.status || "pendente").trim().toLowerCase();
       const isRetirada = (dados.endereco || "").includes("RETIRADA");
 
-      // Se o pedido foi concluído ou cancelado, limpa do localStorage para desativar o banner na tela principal
+      // Se for retirada, ajusta o pagamento
+      if (isRetirada) {
+        document.getElementById('detalhes-pagamento').innerText = "Pagamento direto no Balcão";
+      } else {
+        document.getElementById('detalhes-pagamento').innerText = dados.pagamento || "-";
+      }
+
+      // Se o pedido foi concluído ou cancelado, limpa do localStorage imediatamente
       if (status === "concluido" || status === "cancelado") {
         localStorage.removeItem('ultimo_pedido_id');
       }
@@ -191,6 +199,7 @@
 
       [s1, s2, s3, s4].forEach(el => el.className = "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-gray-200 text-gray-500");
 
+      // BLOQUEIO RIGOROSO DE CANCELAMENTO
       if (status === "pendente") {
         linha.style.width = "0%";
         s1.className = "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-yellow-500 text-white shadow";
@@ -231,9 +240,10 @@
         s1.className = s2.className = s3.className = s4.className = "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-green-600 text-white shadow";
         icone.className = "w-16 h-16 rounded-full mx-auto flex items-center justify-center bg-green-100 text-green-600";
         icone.innerHTML = '<i data-lucide="check-circle-2" class="w-8 h-8"></i>';
-        titulo.innerText = "Pedido Concluído!";
+        titulo.innerText = isRetirada ? "Pedido Retirado!" : "Pedido Entregue!";
         sub.innerText = "Agradecemos pela preferência! Bom apetite.";
 
+        // JAMAIS EXIBE BOTÃO DE CANCELAR APÓS CONCLUÍDO
         boxCancelamento.classList.add('hidden');
         avisoPreparo.classList.add('hidden');
 
