@@ -66,7 +66,7 @@
       </div>
     </div>
 
-    <!-- Botão de Cancelamento Restrito (Exclusivamente enquanto Pendente) -->
+    <!-- Botão de Cancelamento Restrito (Exclusivo para Pendente) -->
     <div id="box-cancelamento" class="hidden">
       <button onclick="confirmarCancelamento()" class="w-full bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all">
         <i data-lucide="x-circle" class="w-4 h-4"></i> Cancelar meu Pedido
@@ -169,7 +169,11 @@
       const status = (dados.status || "pendente").trim().toLowerCase();
       const isRetirada = (dados.endereco || "").includes("RETIRADA");
 
-      // Adapta o label da 3ª etapa caso seja retirada no balcão
+      // Se o pedido foi concluído ou cancelado, limpa do localStorage para desativar o banner na tela principal
+      if (status === "concluido" || status === "cancelado") {
+        localStorage.removeItem('ultimo_pedido_id');
+      }
+
       const labelStep3 = document.getElementById('label-step-3');
       labelStep3.innerText = isRetirada ? "Pronto" : "A Caminho";
 
@@ -215,7 +219,7 @@
         s1.className = s2.className = "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-indigo-600 text-white";
         s3.className = "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-indigo-600 text-white shadow";
         icone.className = "w-16 h-16 rounded-full mx-auto flex items-center justify-center bg-indigo-100 text-indigo-600";
-        icone.innerHTML = isRetirada ? '<i data-lucide="bag" class="w-8 h-8"></i>' : '<i data-lucide="bike" class="w-8 h-8"></i>';
+        icone.innerHTML = isRetirada ? '<i data-lucide="store" class="w-8 h-8"></i>' : '<i data-lucide="bike" class="w-8 h-8"></i>';
         titulo.innerText = isRetirada ? "Pronto para Retirada!" : "Saiu para Entrega!";
         sub.innerText = isRetirada ? "Pode vir retirar no balcão da lanchonete!" : "O entregador já está a caminho do seu endereço.";
 
@@ -256,6 +260,7 @@
 
         if (dados && dados.sucesso) {
           alert("Pedido cancelado com sucesso.");
+          localStorage.removeItem('ultimo_pedido_id');
           buscarStatusAtual();
         } else {
           alert(dados.motivo || "Não foi possível cancelar o pedido.");
