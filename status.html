@@ -19,11 +19,22 @@
       </a>
       <h1 class="text-base font-extrabold tracking-wide">Status do Pedido</h1>
     </div>
-    <span id="pedido-tag" class="text-xs bg-red-800 text-red-100 font-black px-2.5 py-1 rounded-full">#---</span>
+    <span id="pedido-tag-header" class="text-xs bg-red-800 text-red-100 font-black px-2.5 py-1 rounded-full">#---</span>
   </header>
 
   <!-- Container Mobile-First -->
   <main class="flex-1 max-w-md w-full mx-auto p-4 space-y-4">
+
+    <!-- Card de Identificação em Destaque (Facilita Retirada no Balcão) -->
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-200 text-center flex items-center justify-between">
+      <div class="text-left">
+        <span class="text-[10px] font-extrabold uppercase text-gray-400 block tracking-wider">Número do Pedido</span>
+        <span id="pedido-numero-destaque" class="text-xl font-black text-red-600 tracking-tight">Carregando...</span>
+      </div>
+      <div class="bg-red-50 text-red-600 p-2.5 rounded-xl border border-red-100 flex items-center justify-center">
+        <i data-lucide="ticket" class="w-6 h-6"></i>
+      </div>
+    </div>
 
     <!-- Card de Status Principal -->
     <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 text-center space-y-4">
@@ -121,18 +132,32 @@
     const WHATSAPP_LOJA = "5511999999999";
 
     const urlParams = new URLSearchParams(window.location.search);
-    const idPedido = urlParams.get('p') || localStorage.getItem('ultimo_pedido_id') || "";
+    let idPedido = urlParams.get('p') || localStorage.getItem('ultimo_pedido_id') || "";
+
+    // Formata exibição com hashtag garantida
+    function formatarNumeroPedido(id) {
+      if (!id) return "#---";
+      let limpo = id.toString().trim();
+      return limpo.startsWith("#") ? limpo : `#${limpo}`;
+    }
+
+    function atualizarNumeroPedidoNaTela(id) {
+      const formatado = formatarNumeroPedido(id);
+      document.getElementById('pedido-tag-header').innerText = formatado;
+      document.getElementById('pedido-numero-destaque').innerText = formatado;
+    }
 
     async function buscarStatusAtual() {
       if (!idPedido) {
         document.getElementById('titulo-status').innerText = "Nenhum Pedido Ativo";
         document.getElementById('subtitulo-status').innerText = "Você não possui pedidos ativos no momento.";
+        document.getElementById('pedido-numero-destaque').innerText = "Nenhum Pedido";
         document.getElementById('box-cancelamento').classList.add('hidden');
         document.getElementById('aviso-preparo').classList.add('hidden');
         return;
       }
 
-      document.getElementById('pedido-tag').innerText = idPedido;
+      atualizarNumeroPedidoNaTela(idPedido);
       configurarBotaoWhatsApp();
 
       const iconRefresh = document.getElementById('icon-refresh');
@@ -143,6 +168,10 @@
         const dados = await res.json();
 
         if (dados && dados.encontrado) {
+          if (dados.pedido) {
+            idPedido = dados.pedido;
+            atualizarNumeroPedidoNaTela(idPedido);
+          }
           aplicarStatusNaTela(dados);
         } else {
           document.getElementById('titulo-status').innerText = "Pedido em Processamento";
@@ -156,7 +185,8 @@
     }
 
     function configurarBotaoWhatsApp() {
-      const msgPadrao = `Olá! Preciso de ajuda com o meu pedido ${idPedido}.`;
+      const formatado = formatarNumeroPedido(idPedido);
+      const msgPadrao = `Olá! Preciso de ajuda com o meu pedido ${formatado}.`;
       const link = `https://api.whatsapp.com/send?phone=${WHATSAPP_LOJA}&text=${encodeURIComponent(msgPadrao)}`;
       document.getElementById('btn-ajuda-wpp').href = link;
     }
@@ -170,14 +200,12 @@
       const status = (dados.status || "pendente").trim().toLowerCase();
       const isRetirada = (dados.endereco || "").includes("RETIRADA");
 
-      // Se for retirada, ajusta o pagamento
       if (isRetirada) {
         document.getElementById('detalhes-pagamento').innerText = "Pagamento direto no Balcão";
       } else {
         document.getElementById('detalhes-pagamento').innerText = dados.pagamento || "-";
       }
 
-      // Se o pedido foi concluído ou cancelado, limpa do localStorage imediatamente
       if (status === "concluido" || status === "cancelado") {
         localStorage.removeItem('ultimo_pedido_id');
       }
@@ -199,7 +227,6 @@
 
       [s1, s2, s3, s4].forEach(el => el.className = "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-gray-200 text-gray-500");
 
-      // BLOQUEIO RIGOROSO DE CANCELAMENTO
       if (status === "pendente") {
         linha.style.width = "0%";
         s1.className = "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-yellow-500 text-white shadow";
@@ -243,7 +270,6 @@
         titulo.innerText = isRetirada ? "Pedido Retirado!" : "Pedido Entregue!";
         sub.innerText = "Agradecemos pela preferência! Bom apetite.";
 
-        // JAMAIS EXIBE BOTÃO DE CANCELAR APÓS CONCLUÍDO
         boxCancelamento.classList.add('hidden');
         avisoPreparo.classList.add('hidden');
 
@@ -283,6 +309,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
+      atualizarNumeroPedidoNaTela(idPedido);
       buscarStatusAtual();
       setInterval(buscarStatusAtual, 15000);
     });
