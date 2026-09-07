@@ -208,7 +208,7 @@
     let produtos = [];
     let carrinho = {};
     const categoriasAbertas = new Set();
-    let lojaAbertaStatus = true; // Controlado dinamicamente pela API do backend
+    let lojaAbertaStatus = true;
 
     async function verificarPedidoAtivo() {
       const pedSalvo = localStorage.getItem('ultimo_pedido_id');
@@ -251,22 +251,16 @@
         const res = await fetch(urlReq);
         const data = await res.json();
 
-        // Interceptação de bloqueio de horário agendado de demonstração
-        if (data && (data.bloqueado || data.erro)) {
+        // Bloqueio de horário agendado de demonstração (APENAS se houver TOKEN_URL)
+        if (TOKEN_URL && data && (data.bloqueado || data.erro)) {
           document.body.innerHTML = `
             <div class="min-h-screen flex items-center justify-center p-6 bg-slate-900 text-white text-center font-sans">
               <div class="max-w-md w-full bg-slate-800 p-8 rounded-3xl border border-slate-700 shadow-2xl space-y-4">
-                <div class="w-16 h-16 bg-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center mx-auto text-3xl">
-                  ⏳
-                </div>
+                <div class="w-16 h-16 bg-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center mx-auto text-3xl">⏳</div>
                 <h2 class="text-xl font-black tracking-tight text-white">Demonstração Bloqueada</h2>
-                <p class="text-xs text-slate-300 leading-relaxed">
-                  ${data.mensagem || "Este acesso só estará disponível no horário agendado."}
-                </p>
+                <p class="text-xs text-slate-300 leading-relaxed">${data.mensagem || "Este acesso só estará disponível no horário agendado."}</p>
                 <div class="pt-2">
-                  <a href="https://pedejato.com.br" class="inline-block w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-red-600/30">
-                    Voltar para o Início
-                  </a>
+                  <a href="https://pedejato.com.br" class="inline-block w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-red-600/30">Voltar para o Início</a>
                 </div>
               </div>
             </div>
@@ -274,7 +268,6 @@
           return;
         }
 
-        // Aplica validação de horário de funcionamento da loja
         aplicarStatusHorario(data.lojaAberta, data.horarioInicio, data.horarioFim);
 
         produtos = data.produtos || (Array.isArray(data) ? data : []);
@@ -285,7 +278,8 @@
     }
 
     function aplicarStatusHorario(aberta, inicio, fim) {
-      lojaAbertaStatus = (aberta !== false);
+      // Exige true estrito para evitar falsos positivos
+      lojaAbertaStatus = (aberta === true);
 
       const banner = document.getElementById('banner-horario');
       const box = document.getElementById('banner-horario-conteudo');
@@ -524,7 +518,6 @@
       if (total > 0) {
         footer.classList.remove('hidden');
 
-        // Se a loja estiver fechada, desativa o botão de avançar no carrinho
         if (!lojaAbertaStatus) {
           btnAvancar.disabled = true;
           btnAvancar.className = "bg-gray-400 text-white font-bold py-2.5 px-6 rounded-xl shadow cursor-not-allowed flex items-center gap-2";
@@ -564,13 +557,11 @@
         boxEndereco.classList.add('hidden');
         inputEndereco.removeAttribute('required');
         inputEndereco.value = "";
-
         boxPagamento.classList.add('hidden');
         boxAvisoRetirada.classList.remove('hidden');
       } else {
         boxEndereco.classList.remove('hidden');
         inputEndereco.setAttribute('required', 'true');
-
         boxPagamento.classList.remove('hidden');
         boxAvisoRetirada.classList.add('hidden');
         alternarFormaPagamento();
@@ -649,7 +640,6 @@
 
         const resposta = await res.json();
 
-        // Se o backend recusou por estar fora do horário configurado
         if (resposta && resposta.status === "erro") {
           alert(resposta.message || "Não foi possível registrar o pedido no momento.");
           btn.innerText = "Confirmar Pedido";
