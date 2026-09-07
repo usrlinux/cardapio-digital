@@ -17,6 +17,17 @@
     <p class="text-xs text-red-100 font-medium">Faça seu pedido online sem taxas</p>
   </header>
 
+  <!-- Banner de Horário de Funcionamento (Aberto vs Fechado) -->
+  <div id="banner-horario" class="max-w-md mx-auto px-4 pt-3 hidden">
+    <div id="banner-horario-conteudo" class="p-3 rounded-2xl text-xs font-bold flex items-center justify-between shadow-sm">
+      <div class="flex items-center gap-2">
+        <span id="ponto-status-horario" class="w-2.5 h-2.5 rounded-full"></span>
+        <span id="texto-status-horario">Carregando status...</span>
+      </div>
+      <span id="badge-horario-expediente" class="text-[10px] bg-white/60 px-2 py-0.5 rounded-md uppercase font-extrabold"></span>
+    </div>
+  </div>
+
   <!-- Banner de Acompanhar Pedido Ativo -->
   <div id="banner-acompanhar" class="max-w-md mx-auto px-4 pt-3 hidden">
     <a id="link-status-banner" href="status.html" class="bg-amber-500 hover:bg-amber-600 text-amber-950 px-4 py-2.5 rounded-xl text-xs font-black shadow flex items-center justify-between transition-all">
@@ -38,8 +49,8 @@
       <span class="text-xs text-gray-400 block font-bold">Total:</span>
       <span class="text-lg font-black text-gray-900" id="total-carrinho">R$ 0,00</span>
     </div>
-    <button onclick="abrirModalCheckout()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 rounded-xl shadow active:scale-95 transition-all flex items-center gap-2">
-      <i data-lucide="shopping-bag" class="w-4 h-4"></i> Avançar Pedido
+    <button id="btn-avancar-carrinho" onclick="abrirModalCheckout()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 rounded-xl shadow active:scale-95 transition-all flex items-center gap-2">
+      <i data-lucide="shopping-bag" class="w-4 h-4"></i> <span id="label-btn-carrinho">Avançar Pedido</span>
     </button>
   </div>
 
@@ -189,7 +200,481 @@
   </div>
 
   <script>
-    function _0x78c3(_0x1c8fd9,_0x599b70){_0x1c8fd9=_0x1c8fd9-0x1f4;const _0x418d94=_0x418d();let _0x78c3fe=_0x418d94[_0x1c8fd9];return _0x78c3fe;}const _0x2246c9=_0x78c3;(function(_0x35327b,_0x1b289a){const _0x1c154c=_0x78c3,_0x33a4b3=_0x35327b();while(!![]){try{const _0x4e7a68=parseInt(_0x1c154c(0x210))/0x1*(parseInt(_0x1c154c(0x260))/0x2)+parseInt(_0x1c154c(0x219))/0x3+-parseInt(_0x1c154c(0x26c))/0x4*(-parseInt(_0x1c154c(0x26f))/0x5)+parseInt(_0x1c154c(0x252))/0x6+parseInt(_0x1c154c(0x21c))/0x7+-parseInt(_0x1c154c(0x25c))/0x8*(parseInt(_0x1c154c(0x277))/0x9)+-parseInt(_0x1c154c(0x244))/0xa;if(_0x4e7a68===_0x1b289a)break;else _0x33a4b3['push'](_0x33a4b3['shift']());}catch(_0x4365a3){_0x33a4b3['push'](_0x33a4b3['shift']());}}}(_0x418d,0x997b6));const API_URL=_0x2246c9(0x247),urlParams=new URLSearchParams(window[_0x2246c9(0x21d)][_0x2246c9(0x274)]),TOKEN_URL=(urlParams[_0x2246c9(0x272)]('token')||'')[_0x2246c9(0x238)]();let produtos=[],carrinho={};const categoriasAbertas=new Set();async function verificarPedidoAtivo(){const _0x2a3ea8=_0x2246c9,_0x4e981a=localStorage[_0x2a3ea8(0x213)]('ultimo_pedido_id');if(!_0x4e981a){document['getElementById']('banner-acompanhar')[_0x2a3ea8(0x25b)][_0x2a3ea8(0x264)]('hidden');return;}try{let _0x47f562=API_URL+_0x2a3ea8(0x220)+encodeURIComponent(_0x4e981a);TOKEN_URL&&(_0x47f562+='&token='+encodeURIComponent(TOKEN_URL));const _0x18925d=await fetch(_0x47f562),_0x1719be=await _0x18925d[_0x2a3ea8(0x25f)]();if(_0x1719be&&_0x1719be[_0x2a3ea8(0x229)]){const _0x1eebbf=(_0x1719be['status']||'')[_0x2a3ea8(0x1fd)]();if(_0x1eebbf===_0x2a3ea8(0x24c)||_0x1eebbf==='cancelado'){localStorage[_0x2a3ea8(0x20b)](_0x2a3ea8(0x215)),document['getElementById'](_0x2a3ea8(0x20d))[_0x2a3ea8(0x25b)][_0x2a3ea8(0x264)]('hidden');return;}}document[_0x2a3ea8(0x235)](_0x2a3ea8(0x20d))[_0x2a3ea8(0x25b)]['remove'](_0x2a3ea8(0x23b)),document['getElementById']('link-status-banner')[_0x2a3ea8(0x265)]=_0x2a3ea8(0x23c)+encodeURIComponent(_0x4e981a)+(TOKEN_URL?_0x2a3ea8(0x22f)+encodeURIComponent(TOKEN_URL):'');}catch(_0x13b16b){document['getElementById'](_0x2a3ea8(0x20d))[_0x2a3ea8(0x25b)][_0x2a3ea8(0x22e)](_0x2a3ea8(0x23b)),document[_0x2a3ea8(0x235)](_0x2a3ea8(0x243))[_0x2a3ea8(0x265)]=_0x2a3ea8(0x23c)+encodeURIComponent(_0x4e981a)+(TOKEN_URL?'&token='+encodeURIComponent(TOKEN_URL):'');}}async function carregarProdutos(){const _0x42ec38=_0x2246c9;try{let _0x385de6=API_URL;TOKEN_URL&&(_0x385de6+=_0x42ec38(0x230)+encodeURIComponent(TOKEN_URL));const _0x1cb3ad=await fetch(_0x385de6),_0xed323a=await _0x1cb3ad[_0x42ec38(0x25f)]();if(_0xed323a&&(_0xed323a['bloqueado']||_0xed323a[_0x42ec38(0x261)])){document['body'][_0x42ec38(0x1f7)]=_0x42ec38(0x27b)+(_0xed323a[_0x42ec38(0x20c)]||_0x42ec38(0x1ff))+_0x42ec38(0x225);return;}produtos=_0xed323a[_0x42ec38(0x253)]||(Array[_0x42ec38(0x275)](_0xed323a)?_0xed323a:[]),renderizarCardapio();}catch(_0x31c943){document[_0x42ec38(0x235)](_0x42ec38(0x207))[_0x42ec38(0x1f7)]='<p\x20class=\x22text-red-500\x20text-center\x20font-bold\x22>Erro\x20ao\x20carregar\x20cardápio.</p>';}}function toggleCategoria(_0x344008,_0x1743c5){const _0x3d4c0b=_0x2246c9;if(_0x1743c5)categoriasAbertas[_0x3d4c0b(0x264)](_0x344008);else categoriasAbertas[_0x3d4c0b(0x1fc)](_0x344008);}function ehCategoriaPizza(_0x2839bc){const _0xfe5a10=_0x2246c9,_0x3f8cf4=(_0x2839bc||'')[_0xfe5a10(0x1fd)]();return _0x3f8cf4===_0xfe5a10(0x206)||_0x3f8cf4==='pizzas';}function renderizarCardapio(){const _0x33e8d5=_0x2246c9,_0x4c1b09=document[_0x33e8d5(0x235)](_0x33e8d5(0x207)),_0xb67e4a=produtos[_0x33e8d5(0x256)]((_0x253fb1,_0x19babc)=>{const _0x1280a5=_0x33e8d5,_0x42140a=_0x19babc[_0x1280a5(0x22a)]||_0x1280a5(0x270);if(!_0x253fb1[_0x42140a])_0x253fb1[_0x42140a]=[];return _0x253fb1[_0x42140a][_0x1280a5(0x271)](_0x19babc),_0x253fb1;},{});let _0x54c580='';for(const [_0x2115a5,_0x4249e3]of Object[_0x33e8d5(0x23a)](_0xb67e4a)){const _0x342cd6=categoriasAbertas[_0x33e8d5(0x266)](_0x2115a5)?'open':'',_0x389db5=_0x2115a5[_0x33e8d5(0x26b)](/'/g,'\x5c\x27'),_0x520d03=ehCategoriaPizza(_0x2115a5);_0x54c580+=_0x33e8d5(0x24e)+_0x342cd6+_0x33e8d5(0x228)+_0x389db5+'\x27,\x20this.open)\x22\x20class=\x22group\x20mb-4\x20bg-white\x20rounded-2xl\x20shadow-sm\x20border\x20border-gray-200\x20overflow-hidden\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<summary\x20class=\x22flex\x20justify-between\x20items-center\x20p-3.5\x20font-bold\x20text-gray-800\x20cursor-pointer\x20select-none\x20bg-gray-50\x20hover:bg-gray-100\x20transition-colors\x20list-none\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22flex\x20items-center\x20gap-2\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22w-1.5\x20h-5\x20bg-red-600\x20rounded-full\x22></span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22text-base\x20font-extrabold\x22>'+_0x2115a5+_0x33e8d5(0x26d)+_0x4249e3['length']+_0x33e8d5(0x22d)+(_0x520d03?_0x33e8d5(0x273):'')+_0x33e8d5(0x259)+_0x4249e3[_0x33e8d5(0x27c)](_0x3f4c57=>{const _0x4bcfb9=_0x33e8d5,_0x27ca8d=carrinho[_0x3f4c57['id']]||0x0;return'\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22bg-white\x20rounded-xl\x20border\x20border-gray-100\x20p-3\x20flex\x20gap-3\x20items-center\x20hover:border-gray-300\x20transition-colors\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<img\x20src=\x22'+(_0x3f4c57[_0x4bcfb9(0x202)]||_0x4bcfb9(0x20e))+_0x4bcfb9(0x1f6)+_0x3f4c57[_0x4bcfb9(0x234)]+_0x4bcfb9(0x26e)+_0x3f4c57[_0x4bcfb9(0x209)]+'</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22text-green-700\x20font-black\x20text-sm\x20block\x20mt-1\x22>R$\x20'+Number(_0x3f4c57[_0x4bcfb9(0x24d)])[_0x4bcfb9(0x226)](0x2)+_0x4bcfb9(0x201)+(_0x27ca8d>0x0?_0x4bcfb9(0x212)+_0x3f4c57['id']+_0x4bcfb9(0x217)+_0x27ca8d+'</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20':'')+'\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20onclick=\x22alterarQtd(\x27'+_0x3f4c57['id']+'\x27,\x201)\x22\x20class=\x22w-7\x20h-7\x20bg-red-600\x20text-white\x20rounded-lg\x20font-black\x20text-sm\x20flex\x20items-center\x20justify-center\x20active:scale-90\x20transition-transform\x22>+</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20';})[_0x33e8d5(0x200)]('')+_0x33e8d5(0x23e);}const _0x322781=Object['entries'](carrinho)[_0x33e8d5(0x25e)](([_0xa40f45])=>_0xa40f45['startsWith'](_0x33e8d5(0x24b)));_0x322781[_0x33e8d5(0x250)]>0x0&&(_0x54c580+='\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22mb-4\x20bg-white\x20rounded-2xl\x20shadow-sm\x20border\x20border-amber-200\x20p-3.5\x20space-y-2\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h4\x20class=\x22text-xs\x20font-black\x20uppercase\x20text-amber-800\x20flex\x20items-center\x20gap-1.5\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<i\x20data-lucide=\x22pie-chart\x22\x20class=\x22w-4\x20h-4\x22></i>\x20Pizzas\x20Meio\x20a\x20Meio\x20no\x20Carrinho\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</h4>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+_0x322781['map'](([_0x264ae1,_0x285af2])=>{const _0xc9e3c6=_0x33e8d5,_0xc36f17=obterDadosItemCarrinho(_0x264ae1);return _0xc9e3c6(0x22c)+_0xc36f17[_0xc9e3c6(0x234)]+_0xc9e3c6(0x1fb)+Number(_0xc36f17[_0xc9e3c6(0x24d)])[_0xc9e3c6(0x226)](0x2)+_0xc9e3c6(0x1f4)+_0x264ae1+'\x27,\x20-1)\x22\x20class=\x22w-6\x20h-6\x20bg-red-100\x20text-red-600\x20rounded\x20font-bold\x22>-</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22text-xs\x20font-bold\x20w-4\x20text-center\x22>'+_0x285af2+_0xc9e3c6(0x263)+_0x264ae1+_0xc9e3c6(0x24a);})[_0x33e8d5(0x200)]('')+_0x33e8d5(0x251)),_0x4c1b09[_0x33e8d5(0x1f7)]=_0x54c580,atualizarBarra(),lucide['createIcons']();}function abrirModalPizza(){const _0x474a4b=_0x2246c9,_0x313bfe=produtos[_0x474a4b(0x25e)](_0xbeecb4=>ehCategoriaPizza(_0xbeecb4[_0x474a4b(0x22a)]));if(_0x313bfe['length']<0x2){alert(_0x474a4b(0x203));return;}const _0x21d0ac=document[_0x474a4b(0x235)](_0x474a4b(0x246)),_0x4e6442=document[_0x474a4b(0x235)](_0x474a4b(0x214));_0x21d0ac[_0x474a4b(0x1f7)]='',_0x4e6442[_0x474a4b(0x1f7)]='',_0x313bfe[_0x474a4b(0x267)]((_0x15a1bb,_0x425866)=>{const _0x364fcc=_0x474a4b,_0x36dfa1=document[_0x364fcc(0x227)](_0x364fcc(0x224));_0x36dfa1[_0x364fcc(0x258)]=_0x15a1bb['id'],_0x36dfa1['text']=_0x15a1bb['nome']+_0x364fcc(0x245)+Number(_0x15a1bb[_0x364fcc(0x24d)])[_0x364fcc(0x226)](0x2)+')',_0x21d0ac['appendChild'](_0x36dfa1);const _0x204095=document[_0x364fcc(0x227)](_0x364fcc(0x224));_0x204095[_0x364fcc(0x258)]=_0x15a1bb['id'],_0x204095[_0x364fcc(0x240)]=_0x15a1bb[_0x364fcc(0x234)]+_0x364fcc(0x245)+Number(_0x15a1bb['preco'])['toFixed'](0x2)+')';if(_0x425866===0x1)_0x204095['selected']=!![];_0x4e6442[_0x364fcc(0x1f8)](_0x204095);}),atualizarPrecoPizzaModal(),document[_0x474a4b(0x235)](_0x474a4b(0x211))[_0x474a4b(0x25b)][_0x474a4b(0x22e)]('hidden'),lucide[_0x474a4b(0x262)]();}function fecharModalPizza(){const _0x169eeb=_0x2246c9;document[_0x169eeb(0x235)](_0x169eeb(0x211))[_0x169eeb(0x25b)][_0x169eeb(0x264)](_0x169eeb(0x23b));}function atualizarPrecoPizzaModal(){const _0x10f98c=_0x2246c9,_0x2928f0=document[_0x10f98c(0x235)](_0x10f98c(0x246))[_0x10f98c(0x258)],_0x15b197=document[_0x10f98c(0x235)](_0x10f98c(0x214))[_0x10f98c(0x258)],_0x4be884=produtos[_0x10f98c(0x23d)](_0x4889ea=>_0x4889ea['id']==_0x2928f0),_0x4f0e03=produtos[_0x10f98c(0x23d)](_0x6c96a1=>_0x6c96a1['id']==_0x15b197),_0x3d6c63=Math[_0x10f98c(0x231)](Number(_0x4be884?_0x4be884[_0x10f98c(0x24d)]:0x0),Number(_0x4f0e03?_0x4f0e03[_0x10f98c(0x24d)]:0x0));document[_0x10f98c(0x235)](_0x10f98c(0x241))[_0x10f98c(0x21b)]=_0x10f98c(0x23f)+_0x3d6c63[_0x10f98c(0x226)](0x2);}function confirmarPizzaMeioAMeio(){const _0x3934bf=_0x2246c9,_0x44533f=document['getElementById'](_0x3934bf(0x246))[_0x3934bf(0x258)],_0x168a32=document['getElementById'](_0x3934bf(0x214))[_0x3934bf(0x258)],_0x827fee=_0x44533f<=_0x168a32?_0x3934bf(0x24b)+_0x44533f+'_'+_0x168a32:_0x3934bf(0x24b)+_0x168a32+'_'+_0x44533f;carrinho[_0x827fee]=(carrinho[_0x827fee]||0x0)+0x1,fecharModalPizza(),renderizarCardapio();}function obterDadosItemCarrinho(_0xd2bdf5){const _0x4388af=_0x2246c9;if(_0xd2bdf5[_0x4388af(0x221)](_0x4388af(0x24b))){const _0x4d19c5=_0xd2bdf5[_0x4388af(0x239)]('_'),_0x3d16af=produtos[_0x4388af(0x23d)](_0x252e9a=>_0x252e9a['id']==_0x4d19c5[0x1]),_0x56b7f6=produtos['find'](_0x5ee110=>_0x5ee110['id']==_0x4d19c5[0x2]),_0x5b2399=_0x3d16af?_0x3d16af[_0x4388af(0x234)]['replace'](/pizza/i,'')['trim']():_0x4388af(0x218),_0x47452d=_0x56b7f6?_0x56b7f6['nome'][_0x4388af(0x26b)](/pizza/i,'')[_0x4388af(0x238)]():_0x4388af(0x237),_0x3d4104=Math[_0x4388af(0x231)](Number(_0x3d16af?_0x3d16af[_0x4388af(0x24d)]:0x0),Number(_0x56b7f6?_0x56b7f6['preco']:0x0));return{'nome':_0x4388af(0x254)+_0x5b2399+_0x4388af(0x269)+_0x47452d,'preco':_0x3d4104};}else{const _0x16892d=produtos[_0x4388af(0x23d)](_0xddf630=>_0xddf630['id']==_0xd2bdf5);return{'nome':_0x16892d?_0x16892d[_0x4388af(0x234)]:'Item','preco':_0x16892d?Number(_0x16892d[_0x4388af(0x24d)]):0x0};}}function alterarQtd(_0x379ad3,_0x4499d4){const _0x24aafe=carrinho[_0x379ad3]||0x0,_0x4050b7=_0x24aafe+_0x4499d4;if(_0x4050b7>0x0)carrinho[_0x379ad3]=_0x4050b7;else delete carrinho[_0x379ad3];renderizarCardapio();}function obterTotalCarrinho(){let _0x1c6902=0x0;for(const [_0x240f7e,_0x31c364]of Object['entries'](carrinho)){const _0x1bc360=obterDadosItemCarrinho(_0x240f7e);_0x1c6902+=_0x1bc360['preco']*_0x31c364;}return _0x1c6902;}function atualizarBarra(){const _0x22dc70=_0x2246c9,_0x4c7e1b=obterTotalCarrinho(),_0x52f077=_0x22dc70(0x23f)+_0x4c7e1b['toFixed'](0x2);document[_0x22dc70(0x235)](_0x22dc70(0x223))['innerText']=_0x52f077,document[_0x22dc70(0x235)](_0x22dc70(0x249))[_0x22dc70(0x21b)]=_0x52f077;const _0x5d2d8f=document[_0x22dc70(0x235)](_0x22dc70(0x22b));if(_0x4c7e1b>0x0)_0x5d2d8f['classList'][_0x22dc70(0x22e)](_0x22dc70(0x23b));else _0x5d2d8f[_0x22dc70(0x25b)][_0x22dc70(0x264)](_0x22dc70(0x23b));}function abrirModalCheckout(){const _0x4ca4ab=_0x2246c9;document['getElementById'](_0x4ca4ab(0x1f5))['classList'][_0x4ca4ab(0x22e)]('hidden'),alternarTipoEntrega(),lucide[_0x4ca4ab(0x262)]();}function fecharModalCheckout(){const _0x4bd8f0=_0x2246c9;document['getElementById']('modal-checkout')[_0x4bd8f0(0x25b)][_0x4bd8f0(0x264)](_0x4bd8f0(0x23b));}function alternarTipoEntrega(){const _0x2b737d=_0x2246c9,_0x500bb8=document[_0x2b737d(0x276)](_0x2b737d(0x1fa))[_0x2b737d(0x258)],_0x5ab1ad=document[_0x2b737d(0x235)]('box-endereco'),_0x12846a=document[_0x2b737d(0x235)](_0x2b737d(0x279)),_0x2dfcea=document[_0x2b737d(0x235)](_0x2b737d(0x20f)),_0x9a71d9=document[_0x2b737d(0x235)](_0x2b737d(0x26a));_0x500bb8===_0x2b737d(0x222)?(_0x5ab1ad['classList'][_0x2b737d(0x264)](_0x2b737d(0x23b)),_0x12846a[_0x2b737d(0x1f9)](_0x2b737d(0x20a)),_0x12846a['value']='',_0x2dfcea[_0x2b737d(0x25b)][_0x2b737d(0x264)](_0x2b737d(0x23b)),_0x9a71d9['classList'][_0x2b737d(0x22e)](_0x2b737d(0x23b))):(_0x5ab1ad[_0x2b737d(0x25b)][_0x2b737d(0x22e)](_0x2b737d(0x23b)),_0x12846a['setAttribute']('required',_0x2b737d(0x21a)),_0x2dfcea['classList']['remove']('hidden'),_0x9a71d9[_0x2b737d(0x25b)][_0x2b737d(0x264)](_0x2b737d(0x23b)),alternarFormaPagamento());}function alternarFormaPagamento(){const _0x1a8d0d=_0x2246c9,_0x2f7a00=document[_0x1a8d0d(0x276)](_0x1a8d0d(0x25d)),_0x70ec94=_0x2f7a00?_0x2f7a00['value']:'Pix',_0x13ee16=document[_0x1a8d0d(0x235)]('box-troco');_0x70ec94===_0x1a8d0d(0x278)?_0x13ee16[_0x1a8d0d(0x25b)][_0x1a8d0d(0x22e)](_0x1a8d0d(0x23b)):_0x13ee16[_0x1a8d0d(0x25b)][_0x1a8d0d(0x264)]('hidden');}async function enviarPedido(_0x477865){const _0x278ea0=_0x2246c9;_0x477865[_0x278ea0(0x232)]();const _0x405eb5=document[_0x278ea0(0x235)]('btn-confirmar-pedido');_0x405eb5['innerText']='Processando\x20Pedido...',_0x405eb5[_0x278ea0(0x205)]=!![];const _0x310164=document['getElementById']('chk-nome')[_0x278ea0(0x258)][_0x278ea0(0x238)](),_0x5b27de=document[_0x278ea0(0x276)](_0x278ea0(0x1fa))[_0x278ea0(0x258)],_0x1caada=_0x5b27de===_0x278ea0(0x222)?_0x278ea0(0x216):document[_0x278ea0(0x235)](_0x278ea0(0x279))[_0x278ea0(0x258)][_0x278ea0(0x238)]();let _0x4aaebd='Acerto\x20no\x20Balcão',_0x4123f4='';if(_0x5b27de===_0x278ea0(0x25a)){const _0x11b116=document[_0x278ea0(0x276)](_0x278ea0(0x25d));_0x4aaebd=_0x11b116?_0x11b116[_0x278ea0(0x258)]:_0x278ea0(0x21f),_0x4123f4=_0x4aaebd===_0x278ea0(0x278)?document[_0x278ea0(0x235)](_0x278ea0(0x233))[_0x278ea0(0x258)][_0x278ea0(0x238)]():'';}const _0x258396=document[_0x278ea0(0x235)]('chk-observacao')[_0x278ea0(0x258)]['trim']();let _0xdd8b40=0x0;const _0x5abd40=[];for(const [_0x5d176d,_0x44308c]of Object[_0x278ea0(0x23a)](carrinho)){const _0x18deff=obterDadosItemCarrinho(_0x5d176d);_0x5abd40[_0x278ea0(0x271)]('•\x20'+_0x44308c+'x\x20'+_0x18deff[_0x278ea0(0x234)]),_0xdd8b40+=_0x18deff[_0x278ea0(0x24d)]*_0x44308c;}const _0x4917e7=_0x278ea0(0x23f)+_0xdd8b40['toFixed'](0x2),_0x550ce5=_0x5abd40[_0x278ea0(0x200)]('\x0a'),_0x7e5fe='#'+Math[_0x278ea0(0x236)](0x3e8+Math[_0x278ea0(0x257)]()*0x2328);try{const _0x31c022=JSON[_0x278ea0(0x24f)]({'pedido':_0x7e5fe,'cliente':_0x310164,'itens':_0x550ce5,'total':_0x4917e7,'endereco':_0x1caada,'pagamento':_0x4aaebd,'trocoPara':_0x4123f4,'tipoEntrega':_0x5b27de,'observacao':_0x258396,'token':TOKEN_URL}),_0x14e1a5=await fetch(API_URL,{'method':_0x278ea0(0x242),'headers':{'Content-Type':_0x278ea0(0x1fe)},'body':_0x31c022}),_0xd53668=await _0x14e1a5[_0x278ea0(0x25f)]();if(_0xd53668&&_0xd53668[_0x278ea0(0x208)]===_0x278ea0(0x261)){alert(_0xd53668[_0x278ea0(0x21e)]||'Não\x20foi\x20possível\x20registrar\x20o\x20pedido\x20no\x20momento.'),_0x405eb5[_0x278ea0(0x21b)]=_0x278ea0(0x268),_0x405eb5[_0x278ea0(0x205)]=![];return;}const _0x1b5f44=_0xd53668&&_0xd53668[_0x278ea0(0x255)]?_0xd53668[_0x278ea0(0x255)]:_0x7e5fe;localStorage[_0x278ea0(0x204)](_0x278ea0(0x215),_0x1b5f44),carrinho={};const _0x24bffd='status.html?p='+encodeURIComponent(_0x1b5f44)+(TOKEN_URL?_0x278ea0(0x22f)+encodeURIComponent(TOKEN_URL):'');window[_0x278ea0(0x21d)][_0x278ea0(0x265)]=_0x24bffd;}catch(_0x4b0485){console[_0x278ea0(0x27d)](_0x278ea0(0x27a),_0x4b0485),alert(_0x278ea0(0x248)),_0x405eb5['innerText']='Confirmar\x20Pedido',_0x405eb5[_0x278ea0(0x205)]=![];}}verificarPedidoAtivo(),carregarProdutos();function _0x418d(){const _0x1b877d=['Este\x20acesso\x20só\x20estará\x20disponível\x20no\x20horário\x20agendado.','join','</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22flex\x20items-center\x20gap-2\x20bg-gray-50\x20p-1\x20rounded-xl\x20border\x20border-gray-200\x20flex-shrink-0\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','imagem','É\x20necessário\x20ter\x20pelo\x20menos\x202\x20sabores\x20de\x20pizza\x20cadastrados\x20para\x20montar\x20meio\x20a\x20meio.','setItem','disabled','pizza','catalogo','status','descricao','required','removeItem','mensagem','banner-acompanhar','https://placehold.co/100','box-pagamento-completo','130721OVxAmT','modal-pizza','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20onclick=\x22alterarQtd(\x27','getItem','pizza-sabor-2','ultimo_pedido_id','🥡\x20Retirada\x20no\x20Balcão','\x27,\x20-1)\x22\x20class=\x22w-7\x20h-7\x20bg-red-100\x20text-red-600\x20rounded-lg\x20font-black\x20text-sm\x20flex\x20items-center\x20justify-center\x20active:scale-90\x20transition-transform\x22>-</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22text-xs\x20font-black\x20text-gray-800\x20w-4\x20text-center\x22>','Sabor\x201','2599857FllZfy','true','innerText','1797075BVNKvd','location','message','Pix','?v=status&pedido=','startsWith','retirada','total-carrinho','option','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22pt-2\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<a\x20href=\x22https://pedejato.com.br\x22\x20class=\x22inline-block\x20w-full\x20bg-red-600\x20hover:bg-red-700\x20text-white\x20font-black\x20py-3\x20rounded-xl\x20text-xs\x20uppercase\x20tracking-wider\x20transition-all\x20shadow-lg\x20shadow-red-600/30\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20Voltar\x20para\x20o\x20Início\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</a>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','toFixed','createElement','\x20ontoggle=\x22toggleCategoria(\x27','encontrado','categoria','footer-carrinho','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22flex\x20justify-between\x20items-center\x20bg-amber-50\x20p-2.5\x20rounded-xl\x20text-xs\x20border\x20border-amber-100\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22flex-1\x20pr-2\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22font-bold\x20text-gray-800\x22>','</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<svg\x20class=\x22w-5\x20h-5\x20text-gray-400\x20transition-transform\x20duration-200\x20group-open:rotate-180\x22\x20fill=\x22none\x22\x20viewBox=\x220\x200\x2024\x2024\x22\x20stroke=\x22currentColor\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<path\x20stroke-linecap=\x22round\x22\x20stroke-linejoin=\x22round\x22\x20stroke-width=\x222\x22\x20d=\x22M19\x209l-7\x207-7-7\x22\x20/>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</svg>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</summary>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22p-3\x20space-y-3\x20border-t\x20border-gray-100\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','remove','&token=','?token=','max','preventDefault','chk-troco','nome','getElementById','floor','Sabor\x202','trim','split','entries','hidden','status.html?p=','find','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</details>\x0a\x20\x20\x20\x20\x20\x20\x20\x20','R$\x20','text','pizza-modal-preco','POST','link-status-banner','31351820hBmccg','\x20(R$\x20','pizza-sabor-1','https://script.google.com/macros/s/AKfycbwiv1CzceVgKL3JOejjkHuwzhrChM9ZSkgKXU8Ee8axsBU9U0K53f7dzBLDfZPEuwU/exec','Erro\x20de\x20conexão\x20ao\x20enviar\x20o\x20pedido.\x20Tente\x20novamente.','chk-total-modal','\x27,\x201)\x22\x20class=\x22w-6\x20h-6\x20bg-red-600\x20text-white\x20rounded\x20font-bold\x22>+</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','meio_','concluido','preco','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<details\x20','stringify','length','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20','5520486kJupMD','produtos','Pizza\x201/2\x20','pedido','reduce','random','value','\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','delivery','classList','4528dOsHmv','input[name=\x22forma_pagamento\x22]:checked','filter','json','18xnRRtb','erro','createIcons','</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20onclick=\x22alterarQtd(\x27','add','href','has','forEach','Confirmar\x20Pedido','\x20+\x201/2\x20','box-aviso-retirada','replace','8AzwWtw','</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22text-xs\x20bg-gray-200\x20text-gray-600\x20px-2\x20py-0.5\x20rounded-full\x20font-bold\x22>','</h3>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22text-xs\x20text-gray-400\x20line-clamp-2\x20mt-0.5\x20font-medium\x22>','2143735lGHVkJ','Outros','push','get','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22bg-amber-50\x20border\x20border-amber-200\x20rounded-xl\x20p-3\x20flex\x20items-center\x20justify-between\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h4\x20class=\x22text-xs\x20font-black\x20text-amber-900\x22>Quer\x20montar\x20Meio\x20a\x20Meio?</h4>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22text-[11px]\x20text-amber-700\x22>Escolha\x202\x20sabores\x20em\x201\x20única\x20pizza.</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20onclick=\x22abrirModalPizza()\x22\x20class=\x22bg-amber-600\x20hover:bg-amber-700\x20text-white\x20font-black\x20text-xs\x20px-3\x20py-2\x20rounded-lg\x20shadow\x20active:scale-95\x20transition-all\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20Montar\x201/2\x20a\x201/2\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','search','isArray','querySelector','4986SduKAz','Dinheiro','chk-endereco','Erro\x20ao\x20processar\x20pedido:','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22min-h-screen\x20flex\x20items-center\x20justify-center\x20p-6\x20bg-slate-900\x20text-white\x20text-center\x20font-sans\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22max-w-md\x20w-full\x20bg-slate-800\x20p-8\x20rounded-3xl\x20border\x20border-slate-700\x20shadow-2xl\x20space-y-4\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22w-16\x20h-16\x20bg-amber-500/20\x20text-amber-400\x20rounded-2xl\x20flex\x20items-center\x20justify-center\x20mx-auto\x20text-3xl\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20⏳\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h2\x20class=\x22text-xl\x20font-black\x20tracking-tight\x20text-white\x22>Demonstração\x20Bloqueada</h2>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22text-xs\x20text-slate-300\x20leading-relaxed\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','map','error','\x20un.</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22flex\x20items-center\x20gap-2\x20bg-white\x20p-1\x20rounded-lg\x20border\x20border-amber-200\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20onclick=\x22alterarQtd(\x27','modal-checkout','\x22\x20class=\x22w-20\x20h-20\x20object-cover\x20rounded-xl\x20bg-gray-50\x20flex-shrink-0\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22flex-1\x20min-w-0\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h3\x20class=\x22font-extrabold\x20text-gray-800\x20text-sm\x20truncate\x22>','innerHTML','appendChild','removeAttribute','input[name=\x22tipo_entrega\x22]:checked','</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22text-green-700\x20font-black\x22>R$\x20','delete','toLowerCase','text/plain;charset=utf-8'];_0x418d=function(){return _0x1b877d;};return _0x418d();}
+    const API_URL = "https://script.google.com/macros/s/AKfycbwiv1CzceVgKL3JOejjkHuwzhrChM9ZSkgKXU8Ee8axsBU9U0K53f7dzBLDfZPEuwU/exec";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const TOKEN_URL = (urlParams.get('token') || '').trim();
+
+    let produtos = [];
+    let carrinho = {};
+    const categoriasAbertas = new Set();
+    let lojaAbertaStatus = true; // Controlado dinamicamente pela API do backend
+
+    async function verificarPedidoAtivo() {
+      const pedSalvo = localStorage.getItem('ultimo_pedido_id');
+      if (!pedSalvo) {
+        document.getElementById('banner-acompanhar').classList.add('hidden');
+        return;
+      }
+
+      try {
+        let urlConsulta = `${API_URL}?v=status&pedido=${encodeURIComponent(pedSalvo)}`;
+        if (TOKEN_URL) {
+          urlConsulta += `&token=${encodeURIComponent(TOKEN_URL)}`;
+        }
+
+        const res = await fetch(urlConsulta);
+        const dados = await res.json();
+        if (dados && dados.encontrado) {
+          const st = (dados.status || "").toLowerCase();
+          if (st === "concluido" || st === "cancelado") {
+            localStorage.removeItem('ultimo_pedido_id');
+            document.getElementById('banner-acompanhar').classList.add('hidden');
+            return;
+          }
+        }
+        document.getElementById('banner-acompanhar').classList.remove('hidden');
+        document.getElementById('link-status-banner').href = `status.html?p=${encodeURIComponent(pedSalvo)}${TOKEN_URL ? '&token=' + encodeURIComponent(TOKEN_URL) : ''}`;
+      } catch (e) {
+        document.getElementById('banner-acompanhar').classList.remove('hidden');
+        document.getElementById('link-status-banner').href = `status.html?p=${encodeURIComponent(pedSalvo)}${TOKEN_URL ? '&token=' + encodeURIComponent(TOKEN_URL) : ''}`;
+      }
+    }
+
+    async function carregarProdutos() {
+      try {
+        let urlReq = API_URL;
+        if (TOKEN_URL) {
+          urlReq += `?token=${encodeURIComponent(TOKEN_URL)}`;
+        }
+
+        const res = await fetch(urlReq);
+        const data = await res.json();
+
+        // Interceptação de bloqueio de horário agendado de demonstração
+        if (data && (data.bloqueado || data.erro)) {
+          document.body.innerHTML = `
+            <div class="min-h-screen flex items-center justify-center p-6 bg-slate-900 text-white text-center font-sans">
+              <div class="max-w-md w-full bg-slate-800 p-8 rounded-3xl border border-slate-700 shadow-2xl space-y-4">
+                <div class="w-16 h-16 bg-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center mx-auto text-3xl">
+                  ⏳
+                </div>
+                <h2 class="text-xl font-black tracking-tight text-white">Demonstração Bloqueada</h2>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  ${data.mensagem || "Este acesso só estará disponível no horário agendado."}
+                </p>
+                <div class="pt-2">
+                  <a href="https://pedejato.com.br" class="inline-block w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-red-600/30">
+                    Voltar para o Início
+                  </a>
+                </div>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        // Aplica validação de horário de funcionamento da loja
+        aplicarStatusHorario(data.lojaAberta, data.horarioInicio, data.horarioFim);
+
+        produtos = data.produtos || (Array.isArray(data) ? data : []);
+        renderizarCardapio();
+      } catch (err) {
+        document.getElementById('catalogo').innerHTML = '<p class="text-red-500 text-center font-bold">Erro ao carregar cardápio.</p>';
+      }
+    }
+
+    function aplicarStatusHorario(aberta, inicio, fim) {
+      lojaAbertaStatus = (aberta !== false);
+
+      const banner = document.getElementById('banner-horario');
+      const box = document.getElementById('banner-horario-conteudo');
+      const ponto = document.getElementById('ponto-status-horario');
+      const texto = document.getElementById('texto-status-horario');
+      const badge = document.getElementById('badge-horario-expediente');
+
+      banner.classList.remove('hidden');
+      badge.innerText = `${inicio || '18:00'} às ${fim || '23:30'}`;
+
+      if (lojaAbertaStatus) {
+        box.className = "p-3 rounded-2xl text-xs font-bold flex items-center justify-between shadow-sm bg-emerald-50 text-emerald-900 border border-emerald-200";
+        ponto.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+        texto.innerText = "Aberto para pedidos agora";
+      } else {
+        box.className = "p-3 rounded-2xl text-xs font-bold flex items-center justify-between shadow-sm bg-amber-50 text-amber-900 border border-amber-200";
+        ponto.className = "w-2.5 h-2.5 rounded-full bg-amber-500";
+        texto.innerText = "Fechado no momento";
+      }
+
+      atualizarBarra();
+    }
+
+    function toggleCategoria(categoria, estaAberto) {
+      if (estaAberto) categoriasAbertas.add(categoria);
+      else categoriasAbertas.delete(categoria);
+    }
+
+    function ehCategoriaPizza(cat) {
+      const c = (cat || "").toLowerCase();
+      return c === "pizza" || c === "pizzas";
+    }
+
+    function renderizarCardapio() {
+      const container = document.getElementById('catalogo');
+
+      const categorias = produtos.reduce((acc, p) => {
+        const cat = p.categoria || "Outros";
+        if (!acc[cat]) acc[cat] = [];
+        acc[cat].push(p);
+        return acc;
+      }, {});
+
+      let html = '';
+
+      for (const [categoria, itens] of Object.entries(categorias)) {
+        const isOpen = categoriasAbertas.has(categoria) ? 'open' : '';
+        const catEscapada = categoria.replace(/'/g, "\\'");
+        const isPizza = ehCategoriaPizza(categoria);
+
+        html += `
+          <details ${isOpen} ontoggle="toggleCategoria('${catEscapada}', this.open)" class="group mb-4 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <summary class="flex justify-between items-center p-3.5 font-bold text-gray-800 cursor-pointer select-none bg-gray-50 hover:bg-gray-100 transition-colors list-none">
+              <div class="flex items-center gap-2">
+                <span class="w-1.5 h-5 bg-red-600 rounded-full"></span>
+                <span class="text-base font-extrabold">${categoria}</span>
+                <span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full font-bold">${itens.length}</span>
+              </div>
+              <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </summary>
+
+            <div class="p-3 space-y-3 border-t border-gray-100">
+              ${isPizza ? `
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center justify-between">
+                  <div>
+                    <h4 class="text-xs font-black text-amber-900">Quer montar Meio a Meio?</h4>
+                    <p class="text-[11px] text-amber-700">Escolha 2 sabores em 1 única pizza.</p>
+                  </div>
+                  <button onclick="abrirModalPizza()" class="bg-amber-600 hover:bg-amber-700 text-white font-black text-xs px-3 py-2 rounded-lg shadow active:scale-95 transition-all">
+                    Montar 1/2 a 1/2
+                  </button>
+                </div>
+              ` : ''}
+
+              ${itens.map(p => {
+                const qtd = carrinho[p.id] || 0;
+                return `
+                  <div class="bg-white rounded-xl border border-gray-100 p-3 flex gap-3 items-center hover:border-gray-300 transition-colors">
+                    <img src="${p.imagem || 'https://placehold.co/100'}" class="w-20 h-20 object-cover rounded-xl bg-gray-50 flex-shrink-0">
+                    <div class="flex-1 min-w-0">
+                      <h3 class="font-extrabold text-gray-800 text-sm truncate">${p.nome}</h3>
+                      <p class="text-xs text-gray-400 line-clamp-2 mt-0.5 font-medium">${p.descricao}</p>
+                      <span class="text-green-700 font-black text-sm block mt-1">R$ ${Number(p.preco).toFixed(2)}</span>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-xl border border-gray-200 flex-shrink-0">
+                      ${qtd > 0 ? `
+                        <button onclick="alterarQtd('${p.id}', -1)" class="w-7 h-7 bg-red-100 text-red-600 rounded-lg font-black text-sm flex items-center justify-center active:scale-90 transition-transform">-</button>
+                        <span class="text-xs font-black text-gray-800 w-4 text-center">${qtd}</span>
+                      ` : ''}
+                      <button onclick="alterarQtd('${p.id}', 1)" class="w-7 h-7 bg-red-600 text-white rounded-lg font-black text-sm flex items-center justify-center active:scale-90 transition-transform">+</button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </details>
+        `;
+      }
+
+      const pizzasMeio = Object.entries(carrinho).filter(([k]) => k.startsWith("meio_"));
+      if (pizzasMeio.length > 0) {
+        html += `
+          <div class="mb-4 bg-white rounded-2xl shadow-sm border border-amber-200 p-3.5 space-y-2">
+            <h4 class="text-xs font-black uppercase text-amber-800 flex items-center gap-1.5">
+              <i data-lucide="pie-chart" class="w-4 h-4"></i> Pizzas Meio a Meio no Carrinho
+            </h4>
+            ${pizzasMeio.map(([chave, qtd]) => {
+              const dados = obterDadosItemCarrinho(chave);
+              return `
+                <div class="flex justify-between items-center bg-amber-50 p-2.5 rounded-xl text-xs border border-amber-100">
+                  <div class="flex-1 pr-2">
+                    <p class="font-bold text-gray-800">${dados.nome}</p>
+                    <span class="text-green-700 font-black">R$ ${Number(dados.preco).toFixed(2)} un.</span>
+                  </div>
+                  <div class="flex items-center gap-2 bg-white p-1 rounded-lg border border-amber-200">
+                    <button onclick="alterarQtd('${chave}', -1)" class="w-6 h-6 bg-red-100 text-red-600 rounded font-bold">-</button>
+                    <span class="text-xs font-bold w-4 text-center">${qtd}</span>
+                    <button onclick="alterarQtd('${chave}', 1)" class="w-6 h-6 bg-red-600 text-white rounded font-bold">+</button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+      atualizarBarra();
+      lucide.createIcons();
+    }
+
+    function abrirModalPizza() {
+      const pizzasDisponiveis = produtos.filter(p => ehCategoriaPizza(p.categoria));
+      if (pizzasDisponiveis.length < 2) {
+        alert("É necessário ter pelo menos 2 sabores de pizza cadastrados para montar meio a meio.");
+        return;
+      }
+
+      const sel1 = document.getElementById('pizza-sabor-1');
+      const sel2 = document.getElementById('pizza-sabor-2');
+      sel1.innerHTML = "";
+      sel2.innerHTML = "";
+
+      pizzasDisponiveis.forEach((pz, idx) => {
+        const opt1 = document.createElement('option');
+        opt1.value = pz.id;
+        opt1.text = `${pz.nome} (R$ ${Number(pz.preco).toFixed(2)})`;
+        sel1.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = pz.id;
+        opt2.text = `${pz.nome} (R$ ${Number(pz.preco).toFixed(2)})`;
+        if (idx === 1) opt2.selected = true;
+        sel2.appendChild(opt2);
+      });
+
+      atualizarPrecoPizzaModal();
+      document.getElementById('modal-pizza').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function fecharModalPizza() {
+      document.getElementById('modal-pizza').classList.add('hidden');
+    }
+
+    function atualizarPrecoPizzaModal() {
+      const id1 = document.getElementById('pizza-sabor-1').value;
+      const id2 = document.getElementById('pizza-sabor-2').value;
+      const p1 = produtos.find(p => p.id == id1);
+      const p2 = produtos.find(p => p.id == id2);
+      const precoFinal = Math.max(Number(p1 ? p1.preco : 0), Number(p2 ? p2.preco : 0));
+      document.getElementById('pizza-modal-preco').innerText = `R$ ${precoFinal.toFixed(2)}`;
+    }
+
+    function confirmarPizzaMeioAMeio() {
+      const id1 = document.getElementById('pizza-sabor-1').value;
+      const id2 = document.getElementById('pizza-sabor-2').value;
+      const chave = id1 <= id2 ? `meio_${id1}_${id2}` : `meio_${id2}_${id1}`;
+
+      carrinho[chave] = (carrinho[chave] || 0) + 1;
+      fecharModalPizza();
+      renderizarCardapio();
+    }
+
+    function obterDadosItemCarrinho(chave) {
+      if (chave.startsWith("meio_")) {
+        const partes = chave.split("_");
+        const p1 = produtos.find(p => p.id == partes[1]);
+        const p2 = produtos.find(p => p.id == partes[2]);
+        const nome1 = p1 ? p1.nome.replace(/pizza/i, "").trim() : "Sabor 1";
+        const nome2 = p2 ? p2.nome.replace(/pizza/i, "").trim() : "Sabor 2";
+        const preco = Math.max(Number(p1 ? p1.preco : 0), Number(p2 ? p2.preco : 0));
+        return {
+          nome: `Pizza 1/2 ${nome1} + 1/2 ${nome2}`,
+          preco: preco
+        };
+      } else {
+        const p = produtos.find(p => p.id == chave);
+        return {
+          nome: p ? p.nome : "Item",
+          preco: p ? Number(p.preco) : 0
+        };
+      }
+    }
+
+    function alterarQtd(chave, delta) {
+      const atual = carrinho[chave] || 0;
+      const novaQtd = atual + delta;
+      if (novaQtd > 0) carrinho[chave] = novaQtd;
+      else delete carrinho[chave];
+      renderizarCardapio();
+    }
+
+    function obterTotalCarrinho() {
+      let total = 0;
+      for (const [chave, qtd] of Object.entries(carrinho)) {
+        const item = obterDadosItemCarrinho(chave);
+        total += item.preco * qtd;
+      }
+      return total;
+    }
+
+    function atualizarBarra() {
+      const total = obterTotalCarrinho();
+      const totalFormatado = `R$ ${total.toFixed(2)}`;
+      document.getElementById('total-carrinho').innerText = totalFormatado;
+      document.getElementById('chk-total-modal').innerText = totalFormatado;
+
+      const footer = document.getElementById('footer-carrinho');
+      const btnAvancar = document.getElementById('btn-avancar-carrinho');
+      const labelBtn = document.getElementById('label-btn-carrinho');
+
+      if (total > 0) {
+        footer.classList.remove('hidden');
+
+        // Se a loja estiver fechada, desativa o botão de avançar no carrinho
+        if (!lojaAbertaStatus) {
+          btnAvancar.disabled = true;
+          btnAvancar.className = "bg-gray-400 text-white font-bold py-2.5 px-6 rounded-xl shadow cursor-not-allowed flex items-center gap-2";
+          labelBtn.innerText = "Fechado no momento";
+        } else {
+          btnAvancar.disabled = false;
+          btnAvancar.className = "bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 rounded-xl shadow active:scale-95 transition-all flex items-center gap-2";
+          labelBtn.innerText = "Avançar Pedido";
+        }
+      } else {
+        footer.classList.add('hidden');
+      }
+    }
+
+    function abrirModalCheckout() {
+      if (!lojaAbertaStatus) {
+        alert("O estabelecimento está fechado para pedidos no momento.");
+        return;
+      }
+      document.getElementById('modal-checkout').classList.remove('hidden');
+      alternarTipoEntrega();
+      lucide.createIcons();
+    }
+
+    function fecharModalCheckout() {
+      document.getElementById('modal-checkout').classList.add('hidden');
+    }
+
+    function alternarTipoEntrega() {
+      const tipo = document.querySelector('input[name="tipo_entrega"]:checked').value;
+      const boxEndereco = document.getElementById('box-endereco');
+      const inputEndereco = document.getElementById('chk-endereco');
+      const boxPagamento = document.getElementById('box-pagamento-completo');
+      const boxAvisoRetirada = document.getElementById('box-aviso-retirada');
+
+      if (tipo === 'retirada') {
+        boxEndereco.classList.add('hidden');
+        inputEndereco.removeAttribute('required');
+        inputEndereco.value = "";
+
+        boxPagamento.classList.add('hidden');
+        boxAvisoRetirada.classList.remove('hidden');
+      } else {
+        boxEndereco.classList.remove('hidden');
+        inputEndereco.setAttribute('required', 'true');
+
+        boxPagamento.classList.remove('hidden');
+        boxAvisoRetirada.classList.add('hidden');
+        alternarFormaPagamento();
+      }
+    }
+
+    function alternarFormaPagamento() {
+      const checkedPgto = document.querySelector('input[name="forma_pagamento"]:checked');
+      const forma = checkedPgto ? checkedPgto.value : "Pix";
+      const boxTroco = document.getElementById('box-troco');
+      if (forma === 'Dinheiro') {
+        boxTroco.classList.remove('hidden');
+      } else {
+        boxTroco.classList.add('hidden');
+      }
+    }
+
+    async function enviarPedido(event) {
+      event.preventDefault();
+
+      if (!lojaAbertaStatus) {
+        alert("O estabelecimento está fechado para pedidos no momento.");
+        return;
+      }
+
+      const btn = document.getElementById('btn-confirmar-pedido');
+      btn.innerText = "Processando Pedido...";
+      btn.disabled = true;
+
+      const nome = document.getElementById('chk-nome').value.trim();
+      const tipo = document.querySelector('input[name="tipo_entrega"]:checked').value;
+      const endereco = tipo === 'retirada' ? "🥡 Retirada no Balcão" : document.getElementById('chk-endereco').value.trim();
+      
+      let formaPgto = "Acerto no Balcão";
+      let troco = "";
+
+      if (tipo === 'delivery') {
+        const checkedPgto = document.querySelector('input[name="forma_pagamento"]:checked');
+        formaPgto = checkedPgto ? checkedPgto.value : "Pix";
+        troco = formaPgto === 'Dinheiro' ? document.getElementById('chk-troco').value.trim() : "";
+      }
+
+      const obs = document.getElementById('chk-observacao').value.trim();
+
+      let total = 0;
+      const linhasItens = [];
+      for (const [chave, qtd] of Object.entries(carrinho)) {
+        const item = obterDadosItemCarrinho(chave);
+        linhasItens.push(`• ${qtd}x ${item.nome}`);
+        total += item.preco * qtd;
+      }
+
+      const totalFormatado = `R$ ${total.toFixed(2)}`;
+      const itensFormatados = linhasItens.join('\n');
+      const idTemp = "#" + Math.floor(1000 + Math.random() * 9000);
+
+      try {
+        const payload = JSON.stringify({
+          pedido: idTemp,
+          cliente: nome,
+          itens: itensFormatados,
+          total: totalFormatado,
+          endereco: endereco,
+          pagamento: formaPgto,
+          trocoPara: troco,
+          tipoEntrega: tipo,
+          observacao: obs,
+          token: TOKEN_URL
+        });
+
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: payload
+        });
+
+        const resposta = await res.json();
+
+        // Se o backend recusou por estar fora do horário configurado
+        if (resposta && resposta.status === "erro") {
+          alert(resposta.message || "Não foi possível registrar o pedido no momento.");
+          btn.innerText = "Confirmar Pedido";
+          btn.disabled = false;
+          return;
+        }
+
+        const idFinal = (resposta && resposta.pedido) ? resposta.pedido : idTemp;
+
+        localStorage.setItem('ultimo_pedido_id', idFinal);
+        carrinho = {};
+
+        const redirectUrl = `status.html?p=${encodeURIComponent(idFinal)}${TOKEN_URL ? '&token=' + encodeURIComponent(TOKEN_URL) : ''}`;
+        window.location.href = redirectUrl;
+
+      } catch (err) {
+        console.error("Erro ao processar pedido:", err);
+        alert("Erro de conexão ao enviar o pedido. Tente novamente.");
+        btn.innerText = "Confirmar Pedido";
+        btn.disabled = false;
+      }
+    }
+
+    verificarPedidoAtivo();
+    carregarProdutos();
   </script>
 </body>
 
