@@ -17,7 +17,7 @@
     <p class="text-xs text-red-100 font-medium">Faça seu pedido online sem taxas</p>
   </header>
 
-  <!-- Banner de Horário de Funcionamento (Aberto vs Fechado) -->
+  <!-- Banner de Horário de Funcionamento -->
   <div id="banner-horario" class="max-w-md mx-auto px-4 pt-3 hidden">
     <div id="banner-horario-conteudo" class="p-3 rounded-2xl text-xs font-bold flex items-center justify-between shadow-sm">
       <div class="flex items-center gap-2">
@@ -52,6 +52,36 @@
     <button id="btn-avancar-carrinho" onclick="abrirModalCheckout()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 rounded-xl shadow active:scale-95 transition-all flex items-center gap-2">
       <i data-lucide="shopping-bag" class="w-4 h-4"></i> <span id="label-btn-carrinho">Avançar Pedido</span>
     </button>
+  </div>
+
+  <!-- MODAL DE ESCOLHA DE OPCIONAIS / ADICIONAIS -->
+  <div id="modal-opcionais" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-end sm:items-center justify-center hidden p-0 sm:p-4">
+    <div class="bg-white rounded-t-3xl sm:rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+      <div class="flex justify-between items-start border-b pb-3">
+        <div class="flex gap-3 items-center">
+          <img id="modal-opt-img" src="" class="w-12 h-12 rounded-xl object-cover bg-gray-100">
+          <div>
+            <h3 id="modal-opt-nome" class="text-base font-black text-gray-900 leading-tight">Nome do Produto</h3>
+            <span id="modal-opt-preco-base" class="text-xs font-bold text-gray-500">R$ 0,00</span>
+          </div>
+        </div>
+        <button type="button" onclick="fecharModalOpcionais()" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto space-y-2 pr-1">
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Deseja adicionar complementos?</p>
+        <div id="modal-opt-lista" class="space-y-2 pt-1"></div>
+      </div>
+
+      <div class="pt-2 border-t space-y-3">
+        <button onclick="confirmarItemComOpcionais()" id="btn-confirmar-opcionais" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-xl text-sm shadow active:scale-95 transition-all flex justify-between px-4 items-center">
+          <span>Adicionar ao Carrinho</span>
+          <span id="modal-opt-subtotal">R$ 0,00</span>
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL DE PIZZA MEIO A MEIO -->
@@ -89,7 +119,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE CHECKOUT ELEGANTE (UI/UX NATIVA) -->
+  <!-- MODAL DE CHECKOUT ELEGANTE -->
   <div id="modal-checkout" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-end sm:items-center justify-center hidden p-0 sm:p-4 transition-all">
     <div class="bg-white rounded-t-3xl sm:rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
       <div class="flex justify-between items-center border-b pb-3">
@@ -127,16 +157,16 @@
         <!-- Nome do Cliente -->
         <div>
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Seu Nome</label>
-          <input type="text" id="chk-nome" required placeholder="Ex: João Silva" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600">
+          <input type="text" id="chk-nome" required placeholder="Ex: João Silva" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600 font-medium">
         </div>
 
-        <!-- Bloco de Endereço (Apenas se for Delivery) -->
+        <!-- Bloco de Endereço -->
         <div id="box-endereco">
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Endereço de Entrega</label>
-          <input type="text" id="chk-endereco" placeholder="Rua, Número, Bairro e Complemento" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600">
+          <input type="text" id="chk-endereco" placeholder="Rua, Número, Bairro e Complemento" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600 font-medium">
         </div>
 
-        <!-- Bloco de Forma de Pagamento (Apenas se for Delivery) -->
+        <!-- Bloco de Pagamento -->
         <div id="box-pagamento-completo">
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Forma de Pagamento na Entrega</label>
           <div class="grid grid-cols-2 gap-2">
@@ -166,26 +196,22 @@
             </label>
           </div>
 
-          <!-- Campo Dinâmico de Troco -->
           <div id="box-troco" class="hidden mt-3">
             <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Precisa de troco para quanto?</label>
-            <input type="text" id="chk-troco" placeholder="Ex: R$ 50,00 ou Não preciso" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600">
+            <input type="text" id="chk-troco" placeholder="Ex: R$ 50,00 ou Não preciso" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600 font-medium">
           </div>
         </div>
 
-        <!-- Aviso para Retirada no Balcão -->
         <div id="box-aviso-retirada" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900">
           <p class="font-bold">🥡 Pagamento direto no balcão da loja.</p>
           <p class="text-[11px] text-amber-700 mt-0.5">Você efetua o pagamento no momento em que for retirar o seu pedido.</p>
         </div>
 
-        <!-- Campo de Observação -->
         <div>
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Observações do Pedido (Opcional)</label>
-          <textarea id="chk-observacao" rows="2" placeholder="Ex: Sem cebola, molho à parte..." class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600"></textarea>
+          <textarea id="chk-observacao" rows="2" placeholder="Ex: Sem cebola, molho à parte..." class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600 font-medium"></textarea>
         </div>
 
-        <!-- Resumo de Total e Botão Final -->
         <div class="border-t pt-3 flex items-center justify-between">
           <div>
             <span class="text-xs text-gray-400 block font-bold">Total a pagar:</span>
@@ -200,7 +226,654 @@
   </div>
 
   <script>
-    const _0x5429a8=_0x19ed;(function(_0x47c5b5,_0x49a52c){const _0x22064b=_0x19ed,_0x1c6836=_0x47c5b5();while(!![]){try{const _0x47b53f=parseInt(_0x22064b(0x1bb))/0x1+parseInt(_0x22064b(0x1d1))/0x2*(-parseInt(_0x22064b(0x19b))/0x3)+parseInt(_0x22064b(0x1a3))/0x4*(parseInt(_0x22064b(0x1b4))/0x5)+-parseInt(_0x22064b(0x1ae))/0x6+-parseInt(_0x22064b(0x1d2))/0x7*(parseInt(_0x22064b(0x17f))/0x8)+-parseInt(_0x22064b(0x1a7))/0x9*(parseInt(_0x22064b(0x1c7))/0xa)+parseInt(_0x22064b(0x146))/0xb;if(_0x47b53f===_0x49a52c)break;else _0x1c6836['push'](_0x1c6836['shift']());}catch(_0x265250){_0x1c6836['push'](_0x1c6836['shift']());}}}(_0x2d59,0xe39e3));const API_URL=_0x5429a8(0x1e2),urlParams=new URLSearchParams(window[_0x5429a8(0x197)][_0x5429a8(0x181)]),TOKEN_URL=(urlParams[_0x5429a8(0x1d9)](_0x5429a8(0x144))||'')['trim']();let produtos=[],carrinho={};const categoriasAbertas=new Set();let lojaAbertaStatus=!![];async function verificarPedidoAtivo(){const _0x1b2ab9=_0x5429a8,_0x227d1d=localStorage[_0x1b2ab9(0x1d6)](_0x1b2ab9(0x15b));if(!_0x227d1d){document['getElementById'](_0x1b2ab9(0x152))[_0x1b2ab9(0x1b8)][_0x1b2ab9(0x1a2)]('hidden');return;}try{let _0x3dbe61=API_URL+_0x1b2ab9(0x191)+encodeURIComponent(_0x227d1d);TOKEN_URL&&(_0x3dbe61+=_0x1b2ab9(0x1dc)+encodeURIComponent(TOKEN_URL));const _0x442627=await fetch(_0x3dbe61),_0x1f5632=await _0x442627[_0x1b2ab9(0x16d)]();if(_0x1f5632&&_0x1f5632[_0x1b2ab9(0x16e)]){const _0xd2f8e2=(_0x1f5632[_0x1b2ab9(0x166)]||'')[_0x1b2ab9(0x170)]();if(_0xd2f8e2===_0x1b2ab9(0x17c)||_0xd2f8e2==='cancelado'){localStorage[_0x1b2ab9(0x18f)](_0x1b2ab9(0x15b)),document[_0x1b2ab9(0x194)](_0x1b2ab9(0x152))[_0x1b2ab9(0x1b8)][_0x1b2ab9(0x1a2)]('hidden');return;}}document[_0x1b2ab9(0x194)](_0x1b2ab9(0x152))['classList'][_0x1b2ab9(0x169)](_0x1b2ab9(0x1dd)),document[_0x1b2ab9(0x194)](_0x1b2ab9(0x15c))[_0x1b2ab9(0x1a1)]=_0x1b2ab9(0x1c0)+encodeURIComponent(_0x227d1d)+(TOKEN_URL?_0x1b2ab9(0x1dc)+encodeURIComponent(TOKEN_URL):'');}catch(_0x1d721a){document[_0x1b2ab9(0x194)](_0x1b2ab9(0x152))[_0x1b2ab9(0x1b8)]['remove'](_0x1b2ab9(0x1dd)),document[_0x1b2ab9(0x194)](_0x1b2ab9(0x15c))[_0x1b2ab9(0x1a1)]=_0x1b2ab9(0x1c0)+encodeURIComponent(_0x227d1d)+(TOKEN_URL?_0x1b2ab9(0x1dc)+encodeURIComponent(TOKEN_URL):'');}}async function carregarProdutos(){const _0x49a698=_0x5429a8;try{let _0x41acdf=API_URL;TOKEN_URL&&(_0x41acdf+=_0x49a698(0x172)+encodeURIComponent(TOKEN_URL));const _0x4eb3fd=await fetch(_0x41acdf),_0xaab985=await _0x4eb3fd[_0x49a698(0x16d)]();if(TOKEN_URL&&_0xaab985&&(_0xaab985[_0x49a698(0x157)]||_0xaab985[_0x49a698(0x1de)])){document['body']['innerHTML']='\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22min-h-screen\x20flex\x20items-center\x20justify-center\x20p-6\x20bg-slate-900\x20text-white\x20text-center\x20font-sans\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22max-w-md\x20w-full\x20bg-slate-800\x20p-8\x20rounded-3xl\x20border\x20border-slate-700\x20shadow-2xl\x20space-y-4\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22w-16\x20h-16\x20bg-amber-500/20\x20text-amber-400\x20rounded-2xl\x20flex\x20items-center\x20justify-center\x20mx-auto\x20text-3xl\x22>⏳</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h2\x20class=\x22text-xl\x20font-black\x20tracking-tight\x20text-white\x22>Demonstração\x20Bloqueada</h2>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22text-xs\x20text-slate-300\x20leading-relaxed\x22>'+(_0xaab985[_0x49a698(0x188)]||_0x49a698(0x14c))+_0x49a698(0x17b);return;}aplicarStatusHorario(_0xaab985[_0x49a698(0x1d5)],_0xaab985['horarioInicio'],_0xaab985[_0x49a698(0x1b9)]),produtos=_0xaab985[_0x49a698(0x153)]||(Array['isArray'](_0xaab985)?_0xaab985:[]),renderizarCardapio();}catch(_0x269d7a){document['getElementById']('catalogo')[_0x49a698(0x149)]=_0x49a698(0x17d);}}function aplicarStatusHorario(_0x3622b7,_0x559a4c,_0x30b225){const _0xda4a89=_0x5429a8;lojaAbertaStatus=_0x3622b7===!![];const _0x5c39ec=document[_0xda4a89(0x194)](_0xda4a89(0x1c5)),_0x55ad98=document['getElementById'](_0xda4a89(0x179)),_0x52e2c3=document[_0xda4a89(0x194)](_0xda4a89(0x1bc)),_0x4540ac=document[_0xda4a89(0x194)](_0xda4a89(0x1b5)),_0x52923d=document['getElementById'](_0xda4a89(0x180));_0x5c39ec[_0xda4a89(0x1b8)]['remove'](_0xda4a89(0x1dd)),_0x52923d[_0xda4a89(0x167)]=(_0x559a4c||_0xda4a89(0x18b))+'\x20às\x20'+(_0x30b225||_0xda4a89(0x187)),lojaAbertaStatus?(_0x55ad98[_0xda4a89(0x1b6)]=_0xda4a89(0x18d),_0x52e2c3[_0xda4a89(0x1b6)]=_0xda4a89(0x198),_0x4540ac['innerText']='Aberto\x20para\x20pedidos\x20agora'):(_0x55ad98[_0xda4a89(0x1b6)]=_0xda4a89(0x165),_0x52e2c3[_0xda4a89(0x1b6)]=_0xda4a89(0x18e),_0x4540ac[_0xda4a89(0x167)]='Fechado\x20no\x20momento'),atualizarBarra();}function toggleCategoria(_0x18bd2c,_0x42015e){const _0x44d61a=_0x5429a8;if(_0x42015e)categoriasAbertas['add'](_0x18bd2c);else categoriasAbertas[_0x44d61a(0x15d)](_0x18bd2c);}function ehCategoriaPizza(_0x3543d9){const _0x5bbd7f=_0x5429a8,_0x3bd7f4=(_0x3543d9||'')[_0x5bbd7f(0x170)]();return _0x3bd7f4===_0x5bbd7f(0x16f)||_0x3bd7f4===_0x5bbd7f(0x1d0);}function renderizarCardapio(){const _0x4bcd29=_0x5429a8,_0xa9b24e=document['getElementById']('catalogo'),_0x202782=produtos[_0x4bcd29(0x192)]((_0x18c3a2,_0x29e5ed)=>{const _0x99c23a=_0x4bcd29,_0x116bde=_0x29e5ed[_0x99c23a(0x175)]||_0x99c23a(0x1c3);if(!_0x18c3a2[_0x116bde])_0x18c3a2[_0x116bde]=[];return _0x18c3a2[_0x116bde][_0x99c23a(0x1b3)](_0x29e5ed),_0x18c3a2;},{});let _0x320b6c='';for(const [_0x429506,_0x1196e8]of Object[_0x4bcd29(0x173)](_0x202782)){const _0x1df64d=categoriasAbertas[_0x4bcd29(0x148)](_0x429506)?_0x4bcd29(0x14a):'',_0x47889b=_0x429506[_0x4bcd29(0x1d7)](/'/g,'\x5c\x27'),_0x31ff5e=ehCategoriaPizza(_0x429506);_0x320b6c+=_0x4bcd29(0x164)+_0x1df64d+'\x20ontoggle=\x22toggleCategoria(\x27'+_0x47889b+_0x4bcd29(0x1a6)+_0x429506+'</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22text-xs\x20bg-gray-200\x20text-gray-600\x20px-2\x20py-0.5\x20rounded-full\x20font-bold\x22>'+_0x1196e8[_0x4bcd29(0x183)]+'</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<svg\x20class=\x22w-5\x20h-5\x20text-gray-400\x20transition-transform\x20duration-200\x20group-open:rotate-180\x22\x20fill=\x22none\x22\x20viewBox=\x220\x200\x2024\x2024\x22\x20stroke=\x22currentColor\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<path\x20stroke-linecap=\x22round\x22\x20stroke-linejoin=\x22round\x22\x20stroke-width=\x222\x22\x20d=\x22M19\x209l-7\x207-7-7\x22\x20/>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</svg>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</summary>\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22p-3\x20space-y-3\x20border-t\x20border-gray-100\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+(_0x31ff5e?_0x4bcd29(0x193):'')+'\x0a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+_0x1196e8[_0x4bcd29(0x190)](_0x2daecc=>{const _0x1a747b=_0x4bcd29,_0x420512=carrinho[_0x2daecc['id']]||0x0;return _0x1a747b(0x1da)+(_0x2daecc['imagem']||_0x1a747b(0x199))+_0x1a747b(0x14f)+_0x2daecc[_0x1a747b(0x168)]+_0x1a747b(0x15e)+_0x2daecc[_0x1a747b(0x1aa)]+'</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22text-green-700\x20font-black\x20text-sm\x20block\x20mt-1\x22>R$\x20'+Number(_0x2daecc[_0x1a747b(0x16c)])[_0x1a747b(0x1c8)](0x2)+_0x1a747b(0x1cf)+(_0x420512>0x0?'\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20onclick=\x22alterarQtd(\x27'+_0x2daecc['id']+_0x1a747b(0x1e0)+_0x420512+_0x1a747b(0x156):'')+_0x1a747b(0x171)+_0x2daecc['id']+'\x27,\x201)\x22\x20class=\x22w-7\x20h-7\x20bg-red-600\x20text-white\x20rounded-lg\x20font-black\x20text-sm\x20flex\x20items-center\x20justify-center\x20active:scale-90\x20transition-transform\x22>+</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20';})['join']('')+_0x4bcd29(0x15f);}const _0x26830c=Object[_0x4bcd29(0x173)](carrinho)['filter'](([_0x4ad636])=>_0x4ad636[_0x4bcd29(0x1c2)](_0x4bcd29(0x163)));_0x26830c['length']>0x0&&(_0x320b6c+='\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22mb-4\x20bg-white\x20rounded-2xl\x20shadow-sm\x20border\x20border-amber-200\x20p-3.5\x20space-y-2\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h4\x20class=\x22text-xs\x20font-black\x20uppercase\x20text-amber-800\x20flex\x20items-center\x20gap-1.5\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<i\x20data-lucide=\x22pie-chart\x22\x20class=\x22w-4\x20h-4\x22></i>\x20Pizzas\x20Meio\x20a\x20Meio\x20no\x20Carrinho\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</h4>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+_0x26830c[_0x4bcd29(0x190)](([_0x441789,_0xc04e43])=>{const _0xaf4208=_0x4bcd29,_0x3df210=obterDadosItemCarrinho(_0x441789);return _0xaf4208(0x158)+_0x3df210[_0xaf4208(0x168)]+'</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22text-green-700\x20font-black\x22>R$\x20'+Number(_0x3df210['preco'])[_0xaf4208(0x1c8)](0x2)+_0xaf4208(0x18c)+_0x441789+_0xaf4208(0x195)+_0xc04e43+_0xaf4208(0x19c)+_0x441789+_0xaf4208(0x182);})['join']('')+_0x4bcd29(0x1d4)),_0xa9b24e[_0x4bcd29(0x149)]=_0x320b6c,atualizarBarra(),lucide['createIcons']();}function abrirModalPizza(){const _0x4d2179=_0x5429a8,_0x444718=produtos[_0x4d2179(0x1cd)](_0x196914=>ehCategoriaPizza(_0x196914['categoria']));if(_0x444718[_0x4d2179(0x183)]<0x2){alert(_0x4d2179(0x184));return;}const _0x291b37=document[_0x4d2179(0x194)](_0x4d2179(0x1ce)),_0x40a3ed=document[_0x4d2179(0x194)]('pizza-sabor-2');_0x291b37[_0x4d2179(0x149)]='',_0x40a3ed[_0x4d2179(0x149)]='',_0x444718['forEach']((_0x6274c9,_0x179338)=>{const _0xaeefce=_0x4d2179,_0x59ac37=document[_0xaeefce(0x1d8)]('option');_0x59ac37[_0xaeefce(0x1cb)]=_0x6274c9['id'],_0x59ac37[_0xaeefce(0x14e)]=_0x6274c9[_0xaeefce(0x168)]+_0xaeefce(0x16a)+Number(_0x6274c9['preco'])[_0xaeefce(0x1c8)](0x2)+')',_0x291b37[_0xaeefce(0x185)](_0x59ac37);const _0x1861c2=document[_0xaeefce(0x1d8)](_0xaeefce(0x14b));_0x1861c2['value']=_0x6274c9['id'],_0x1861c2[_0xaeefce(0x14e)]=_0x6274c9['nome']+'\x20(R$\x20'+Number(_0x6274c9[_0xaeefce(0x16c)])[_0xaeefce(0x1c8)](0x2)+')';if(_0x179338===0x1)_0x1861c2['selected']=!![];_0x40a3ed[_0xaeefce(0x185)](_0x1861c2);}),atualizarPrecoPizzaModal(),document[_0x4d2179(0x194)]('modal-pizza')[_0x4d2179(0x1b8)]['remove'](_0x4d2179(0x1dd)),lucide['createIcons']();}function fecharModalPizza(){const _0x34dfca=_0x5429a8;document[_0x34dfca(0x194)](_0x34dfca(0x161))[_0x34dfca(0x1b8)][_0x34dfca(0x1a2)](_0x34dfca(0x1dd));}function atualizarPrecoPizzaModal(){const _0x453d0e=_0x5429a8,_0x51afb3=document[_0x453d0e(0x194)](_0x453d0e(0x1ce))[_0x453d0e(0x1cb)],_0x2ddc89=document[_0x453d0e(0x194)](_0x453d0e(0x174))['value'],_0xe14e55=produtos['find'](_0x269089=>_0x269089['id']==_0x51afb3),_0x5b4ab9=produtos['find'](_0x51f26f=>_0x51f26f['id']==_0x2ddc89),_0x279c59=Math[_0x453d0e(0x1c9)](Number(_0xe14e55?_0xe14e55[_0x453d0e(0x16c)]:0x0),Number(_0x5b4ab9?_0x5b4ab9[_0x453d0e(0x16c)]:0x0));document[_0x453d0e(0x194)](_0x453d0e(0x1ad))[_0x453d0e(0x167)]=_0x453d0e(0x18a)+_0x279c59[_0x453d0e(0x1c8)](0x2);}function confirmarPizzaMeioAMeio(){const _0x36efd7=_0x5429a8,_0x22ef35=document['getElementById'](_0x36efd7(0x1ce))[_0x36efd7(0x1cb)],_0x180944=document['getElementById']('pizza-sabor-2')[_0x36efd7(0x1cb)],_0x1fafe6=_0x22ef35<=_0x180944?_0x36efd7(0x163)+_0x22ef35+'_'+_0x180944:_0x36efd7(0x163)+_0x180944+'_'+_0x22ef35;carrinho[_0x1fafe6]=(carrinho[_0x1fafe6]||0x0)+0x1,fecharModalPizza(),renderizarCardapio();}function _0x19ed(_0x53bd12,_0x520cb6){_0x53bd12=_0x53bd12-0x144;const _0x2d59cb=_0x2d59();let _0x19ed2e=_0x2d59cb[_0x53bd12];return _0x19ed2e;}function obterDadosItemCarrinho(_0x1ab9fb){const _0x3a5dd1=_0x5429a8;if(_0x1ab9fb['startsWith'](_0x3a5dd1(0x163))){const _0x485f06=_0x1ab9fb[_0x3a5dd1(0x1cc)]('_'),_0x59d0fe=produtos[_0x3a5dd1(0x1a0)](_0x4ece05=>_0x4ece05['id']==_0x485f06[0x1]),_0x5870bf=produtos[_0x3a5dd1(0x1a0)](_0x433ec7=>_0x433ec7['id']==_0x485f06[0x2]),_0x1cb36d=_0x59d0fe?_0x59d0fe[_0x3a5dd1(0x168)]['replace'](/pizza/i,'')[_0x3a5dd1(0x155)]():_0x3a5dd1(0x154),_0x58aaa6=_0x5870bf?_0x5870bf['nome']['replace'](/pizza/i,'')[_0x3a5dd1(0x155)]():_0x3a5dd1(0x1a9),_0x1905e5=Math['max'](Number(_0x59d0fe?_0x59d0fe[_0x3a5dd1(0x16c)]:0x0),Number(_0x5870bf?_0x5870bf['preco']:0x0));return{'nome':_0x3a5dd1(0x1a8)+_0x1cb36d+_0x3a5dd1(0x16b)+_0x58aaa6,'preco':_0x1905e5};}else{const _0x51c7e1=produtos['find'](_0x480f07=>_0x480f07['id']==_0x1ab9fb);return{'nome':_0x51c7e1?_0x51c7e1[_0x3a5dd1(0x168)]:_0x3a5dd1(0x17e),'preco':_0x51c7e1?Number(_0x51c7e1[_0x3a5dd1(0x16c)]):0x0};}}function alterarQtd(_0x74970e,_0x217ca0){const _0x62acd5=carrinho[_0x74970e]||0x0,_0x466d6e=_0x62acd5+_0x217ca0;if(_0x466d6e>0x0)carrinho[_0x74970e]=_0x466d6e;else delete carrinho[_0x74970e];renderizarCardapio();}function _0x2d59(){const _0x5f3f99=['6868504rThFup','badge-horario-expediente','search','\x27,\x201)\x22\x20class=\x22w-6\x20h-6\x20bg-red-600\x20text-white\x20rounded\x20font-bold\x22>+</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','length','É\x20necessário\x20ter\x20pelo\x20menos\x202\x20sabores\x20de\x20pizza\x20cadastrados\x20para\x20montar\x20meio\x20a\x20meio.','appendChild','Fechado\x20no\x20momento','23:30','mensagem','Processando\x20Pedido...','R$\x20','18:00','\x20un.</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22flex\x20items-center\x20gap-2\x20bg-white\x20p-1\x20rounded-lg\x20border\x20border-amber-200\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20onclick=\x22alterarQtd(\x27','p-3\x20rounded-2xl\x20text-xs\x20font-bold\x20flex\x20items-center\x20justify-between\x20shadow-sm\x20bg-emerald-50\x20text-emerald-900\x20border\x20border-emerald-200','w-2.5\x20h-2.5\x20rounded-full\x20bg-amber-500','removeItem','map','?v=status&pedido=','reduce','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22bg-amber-50\x20border\x20border-amber-200\x20rounded-xl\x20p-3\x20flex\x20items-center\x20justify-between\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h4\x20class=\x22text-xs\x20font-black\x20text-amber-900\x22>Quer\x20montar\x20Meio\x20a\x20Meio?</h4>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22text-[11px]\x20text-amber-700\x22>Escolha\x202\x20sabores\x20em\x201\x20única\x20pizza.</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20onclick=\x22abrirModalPizza()\x22\x20class=\x22bg-amber-600\x20hover:bg-amber-700\x20text-white\x20font-black\x20text-xs\x20px-3\x20py-2\x20rounded-lg\x20shadow\x20active:scale-95\x20transition-all\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20Montar\x201/2\x20a\x201/2\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','getElementById','\x27,\x20-1)\x22\x20class=\x22w-6\x20h-6\x20bg-red-100\x20text-red-600\x20rounded\x20font-bold\x22>-</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22text-xs\x20font-bold\x20w-4\x20text-center\x22>','Não\x20foi\x20possível\x20registrar\x20o\x20pedido\x20no\x20momento.','location','w-2.5\x20h-2.5\x20rounded-full\x20bg-emerald-500\x20animate-pulse','https://placehold.co/100','O\x20estabelecimento\x20está\x20fechado\x20para\x20pedidos\x20no\x20momento.','878601bcNDzU','</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20onclick=\x22alterarQtd(\x27','true','disabled','Erro\x20de\x20conexão\x20ao\x20enviar\x20o\x20pedido.\x20Tente\x20novamente.','find','href','add','12836SXfpiz','box-aviso-retirada','removeAttribute','\x27,\x20this.open)\x22\x20class=\x22group\x20mb-4\x20bg-white\x20rounded-2xl\x20shadow-sm\x20border\x20border-gray-200\x20overflow-hidden\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<summary\x20class=\x22flex\x20justify-between\x20items-center\x20p-3.5\x20font-bold\x20text-gray-800\x20cursor-pointer\x20select-none\x20bg-gray-50\x20hover:bg-gray-100\x20transition-colors\x20list-none\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22flex\x20items-center\x20gap-2\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22w-1.5\x20h-5\x20bg-red-600\x20rounded-full\x22></span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22text-base\x20font-extrabold\x22>','72jvdkin','Pizza\x201/2\x20','Sabor\x202','descricao','footer-carrinho','btn-confirmar-pedido','pizza-modal-preco','10867278nyOXbe','required','retirada','input[name=\x22forma_pagamento\x22]:checked','chk-total-modal','push','1510rQrbFC','texto-status-horario','className','Dinheiro','classList','horarioFim','🥡\x20Retirada\x20no\x20Balcão','455747tBXIEx','ponto-status-horario','Pix','input[name=\x22tipo_entrega\x22]:checked','box-pagamento-completo','status.html?p=','floor','startsWith','Outros','POST','banner-horario','pedido','1704490iXPokr','toFixed','max','setAttribute','value','split','filter','pizza-sabor-1','</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22flex\x20items-center\x20gap-2\x20bg-gray-50\x20p-1\x20rounded-xl\x20border\x20border-gray-200\x20flex-shrink-0\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','pizzas','8TRqIBd','7vjLEiM','Confirmar\x20Pedido','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20','lojaAberta','getItem','replace','createElement','get','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22bg-white\x20rounded-xl\x20border\x20border-gray-100\x20p-3\x20flex\x20gap-3\x20items-center\x20hover:border-gray-300\x20transition-colors\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<img\x20src=\x22','box-endereco','&token=','hidden','erro','querySelector','\x27,\x20-1)\x22\x20class=\x22w-7\x20h-7\x20bg-red-100\x20text-red-600\x20rounded-lg\x20font-black\x20text-sm\x20flex\x20items-center\x20justify-center\x20active:scale-90\x20transition-transform\x22>-</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22text-xs\x20font-black\x20text-gray-800\x20w-4\x20text-center\x22>','box-troco','https://script.google.com/macros/s/AKfycbwiv1CzceVgKL3JOejjkHuwzhrChM9ZSkgKXU8Ee8axsBU9U0K53f7dzBLDfZPEuwU/exec','token','chk-troco','51835234eNhIZd','label-btn-carrinho','has','innerHTML','open','option','Este\x20acesso\x20só\x20estará\x20disponível\x20no\x20horário\x20agendado.','delivery','text','\x22\x20class=\x22w-20\x20h-20\x20object-cover\x20rounded-xl\x20bg-gray-50\x20flex-shrink-0\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22flex-1\x20min-w-0\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h3\x20class=\x22font-extrabold\x20text-gray-800\x20text-sm\x20truncate\x22>','Acerto\x20no\x20Balcão','Avançar\x20Pedido','banner-acompanhar','produtos','Sabor\x201','trim','</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','bloqueado','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22flex\x20justify-between\x20items-center\x20bg-amber-50\x20p-2.5\x20rounded-xl\x20text-xs\x20border\x20border-amber-100\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22flex-1\x20pr-2\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22font-bold\x20text-gray-800\x22>','modal-checkout','chk-endereco','ultimo_pedido_id','link-status-banner','delete','</h3>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22text-xs\x20text-gray-400\x20line-clamp-2\x20mt-0.5\x20font-medium\x22>','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</details>\x0a\x20\x20\x20\x20\x20\x20\x20\x20','message','modal-pizza','setItem','meio_','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<details\x20','p-3\x20rounded-2xl\x20text-xs\x20font-bold\x20flex\x20items-center\x20justify-between\x20shadow-sm\x20bg-amber-50\x20text-amber-900\x20border\x20border-amber-200','status','innerText','nome','remove','\x20(R$\x20','\x20+\x201/2\x20','preco','json','encontrado','pizza','toLowerCase','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20onclick=\x22alterarQtd(\x27','?token=','entries','pizza-sabor-2','categoria','createIcons','error','bg-gray-400\x20text-white\x20font-bold\x20py-2.5\x20px-6\x20rounded-xl\x20shadow\x20cursor-not-allowed\x20flex\x20items-center\x20gap-2','banner-horario-conteudo','preventDefault','</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22pt-2\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<a\x20href=\x22https://pedejato.com.br\x22\x20class=\x22inline-block\x20w-full\x20bg-red-600\x20hover:bg-red-700\x20text-white\x20font-black\x20py-3\x20rounded-xl\x20text-xs\x20uppercase\x20tracking-wider\x20transition-all\x20shadow-lg\x20shadow-red-600/30\x22>Voltar\x20para\x20o\x20Início</a>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','concluido','<p\x20class=\x22text-red-500\x20text-center\x20font-bold\x22>Erro\x20ao\x20carregar\x20cardápio.</p>','Item'];_0x2d59=function(){return _0x5f3f99;};return _0x2d59();}function obterTotalCarrinho(){const _0x25dd76=_0x5429a8;let _0x4da7bd=0x0;for(const [_0xed8a49,_0x41eb4d]of Object[_0x25dd76(0x173)](carrinho)){const _0x341e28=obterDadosItemCarrinho(_0xed8a49);_0x4da7bd+=_0x341e28[_0x25dd76(0x16c)]*_0x41eb4d;}return _0x4da7bd;}function atualizarBarra(){const _0x56dbd1=_0x5429a8,_0x51c5cb=obterTotalCarrinho(),_0x282413=_0x56dbd1(0x18a)+_0x51c5cb[_0x56dbd1(0x1c8)](0x2);document[_0x56dbd1(0x194)]('total-carrinho')[_0x56dbd1(0x167)]=_0x282413,document[_0x56dbd1(0x194)](_0x56dbd1(0x1b2))[_0x56dbd1(0x167)]=_0x282413;const _0x5966e8=document['getElementById'](_0x56dbd1(0x1ab)),_0x4eb9a7=document[_0x56dbd1(0x194)]('btn-avancar-carrinho'),_0x2dfe3f=document[_0x56dbd1(0x194)](_0x56dbd1(0x147));_0x51c5cb>0x0?(_0x5966e8['classList'][_0x56dbd1(0x169)](_0x56dbd1(0x1dd)),!lojaAbertaStatus?(_0x4eb9a7[_0x56dbd1(0x19e)]=!![],_0x4eb9a7[_0x56dbd1(0x1b6)]=_0x56dbd1(0x178),_0x2dfe3f[_0x56dbd1(0x167)]=_0x56dbd1(0x186)):(_0x4eb9a7[_0x56dbd1(0x19e)]=![],_0x4eb9a7['className']='bg-red-600\x20hover:bg-red-700\x20text-white\x20font-bold\x20py-2.5\x20px-6\x20rounded-xl\x20shadow\x20active:scale-95\x20transition-all\x20flex\x20items-center\x20gap-2',_0x2dfe3f[_0x56dbd1(0x167)]=_0x56dbd1(0x151))):_0x5966e8[_0x56dbd1(0x1b8)][_0x56dbd1(0x1a2)]('hidden');}function abrirModalCheckout(){const _0x183660=_0x5429a8;if(!lojaAbertaStatus){alert('O\x20estabelecimento\x20está\x20fechado\x20para\x20pedidos\x20no\x20momento.');return;}document['getElementById'](_0x183660(0x159))[_0x183660(0x1b8)][_0x183660(0x169)](_0x183660(0x1dd)),alternarTipoEntrega(),lucide[_0x183660(0x176)]();}function fecharModalCheckout(){const _0x1d3604=_0x5429a8;document[_0x1d3604(0x194)](_0x1d3604(0x159))[_0x1d3604(0x1b8)][_0x1d3604(0x1a2)]('hidden');}function alternarTipoEntrega(){const _0x1ff2ab=_0x5429a8,_0x280a90=document['querySelector'](_0x1ff2ab(0x1be))[_0x1ff2ab(0x1cb)],_0x431918=document[_0x1ff2ab(0x194)](_0x1ff2ab(0x1db)),_0x3aed67=document['getElementById'](_0x1ff2ab(0x15a)),_0x4ce5ea=document[_0x1ff2ab(0x194)](_0x1ff2ab(0x1bf)),_0x4ad17d=document[_0x1ff2ab(0x194)](_0x1ff2ab(0x1a4));_0x280a90===_0x1ff2ab(0x1b0)?(_0x431918['classList'][_0x1ff2ab(0x1a2)](_0x1ff2ab(0x1dd)),_0x3aed67[_0x1ff2ab(0x1a5)](_0x1ff2ab(0x1af)),_0x3aed67[_0x1ff2ab(0x1cb)]='',_0x4ce5ea[_0x1ff2ab(0x1b8)][_0x1ff2ab(0x1a2)](_0x1ff2ab(0x1dd)),_0x4ad17d[_0x1ff2ab(0x1b8)][_0x1ff2ab(0x169)](_0x1ff2ab(0x1dd))):(_0x431918[_0x1ff2ab(0x1b8)][_0x1ff2ab(0x169)](_0x1ff2ab(0x1dd)),_0x3aed67[_0x1ff2ab(0x1ca)](_0x1ff2ab(0x1af),_0x1ff2ab(0x19d)),_0x4ce5ea[_0x1ff2ab(0x1b8)][_0x1ff2ab(0x169)](_0x1ff2ab(0x1dd)),_0x4ad17d['classList'][_0x1ff2ab(0x1a2)]('hidden'),alternarFormaPagamento());}function alternarFormaPagamento(){const _0x406449=_0x5429a8,_0x4574aa=document['querySelector'](_0x406449(0x1b1)),_0x286e84=_0x4574aa?_0x4574aa[_0x406449(0x1cb)]:_0x406449(0x1bd),_0xbbd41b=document[_0x406449(0x194)](_0x406449(0x1e1));_0x286e84===_0x406449(0x1b7)?_0xbbd41b[_0x406449(0x1b8)][_0x406449(0x169)](_0x406449(0x1dd)):_0xbbd41b[_0x406449(0x1b8)][_0x406449(0x1a2)](_0x406449(0x1dd));}async function enviarPedido(_0x28ddfe){const _0x312ae2=_0x5429a8;_0x28ddfe[_0x312ae2(0x17a)]();if(!lojaAbertaStatus){alert(_0x312ae2(0x19a));return;}const _0x82e501=document[_0x312ae2(0x194)](_0x312ae2(0x1ac));_0x82e501[_0x312ae2(0x167)]=_0x312ae2(0x189),_0x82e501[_0x312ae2(0x19e)]=!![];const _0x552764=document['getElementById']('chk-nome')[_0x312ae2(0x1cb)][_0x312ae2(0x155)](),_0x36f8db=document[_0x312ae2(0x1df)]('input[name=\x22tipo_entrega\x22]:checked')[_0x312ae2(0x1cb)],_0x54ecd6=_0x36f8db==='retirada'?_0x312ae2(0x1ba):document['getElementById'](_0x312ae2(0x15a))[_0x312ae2(0x1cb)]['trim']();let _0x53b0ea=_0x312ae2(0x150),_0x152c7c='';if(_0x36f8db===_0x312ae2(0x14d)){const _0x1b7707=document[_0x312ae2(0x1df)](_0x312ae2(0x1b1));_0x53b0ea=_0x1b7707?_0x1b7707[_0x312ae2(0x1cb)]:_0x312ae2(0x1bd),_0x152c7c=_0x53b0ea===_0x312ae2(0x1b7)?document[_0x312ae2(0x194)](_0x312ae2(0x145))[_0x312ae2(0x1cb)]['trim']():'';}const _0x3b9cfd=document[_0x312ae2(0x194)]('chk-observacao')[_0x312ae2(0x1cb)][_0x312ae2(0x155)]();let _0x2a7cde=0x0;const _0x330136=[];for(const [_0x45e166,_0xe2f0f1]of Object[_0x312ae2(0x173)](carrinho)){const _0xc9a860=obterDadosItemCarrinho(_0x45e166);_0x330136[_0x312ae2(0x1b3)]('•\x20'+_0xe2f0f1+'x\x20'+_0xc9a860[_0x312ae2(0x168)]),_0x2a7cde+=_0xc9a860[_0x312ae2(0x16c)]*_0xe2f0f1;}const _0x235226=_0x312ae2(0x18a)+_0x2a7cde[_0x312ae2(0x1c8)](0x2),_0x3e0625=_0x330136['join']('\x0a'),_0x57e68b='#'+Math[_0x312ae2(0x1c1)](0x3e8+Math['random']()*0x2328);try{const _0x4fa9d5=JSON['stringify']({'pedido':_0x57e68b,'cliente':_0x552764,'itens':_0x3e0625,'total':_0x235226,'endereco':_0x54ecd6,'pagamento':_0x53b0ea,'trocoPara':_0x152c7c,'tipoEntrega':_0x36f8db,'observacao':_0x3b9cfd,'token':TOKEN_URL}),_0x35a137=await fetch(API_URL,{'method':_0x312ae2(0x1c4),'headers':{'Content-Type':'text/plain;charset=utf-8'},'body':_0x4fa9d5}),_0x4553f9=await _0x35a137[_0x312ae2(0x16d)]();if(_0x4553f9&&_0x4553f9[_0x312ae2(0x166)]===_0x312ae2(0x1de)){alert(_0x4553f9[_0x312ae2(0x160)]||_0x312ae2(0x196)),_0x82e501['innerText']='Confirmar\x20Pedido',_0x82e501[_0x312ae2(0x19e)]=![];return;}const _0x2c0596=_0x4553f9&&_0x4553f9[_0x312ae2(0x1c6)]?_0x4553f9['pedido']:_0x57e68b;localStorage[_0x312ae2(0x162)]('ultimo_pedido_id',_0x2c0596),carrinho={};const _0x5159ae=_0x312ae2(0x1c0)+encodeURIComponent(_0x2c0596)+(TOKEN_URL?_0x312ae2(0x1dc)+encodeURIComponent(TOKEN_URL):'');window[_0x312ae2(0x197)][_0x312ae2(0x1a1)]=_0x5159ae;}catch(_0x23319f){console[_0x312ae2(0x177)]('Erro\x20ao\x20processar\x20pedido:',_0x23319f),alert(_0x312ae2(0x19f)),_0x82e501[_0x312ae2(0x167)]=_0x312ae2(0x1d3),_0x82e501[_0x312ae2(0x19e)]=![];}}verificarPedidoAtivo(),carregarProdutos();
+    // URL da API de Stage
+    const API_URL = "https://script.google.com/macros/s/AKfycbwiv1CzceVgKL3JOejjkHuwzhrChM9ZSkgKXU8Ee8axsBU9U0K53f7dzBLDfZPEuwU/exec";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const TOKEN_URL = (urlParams.get('token') || '').trim();
+
+    let produtos = [];
+    let carrinho = {}; // Chaves: 'id_normal', 'meio_id1_id2', 'opt_id_hash'
+    const categoriasAbertas = new Set();
+    let lojaAbertaStatus = true;
+    let produtoEmEdicaoOpcionais = null;
+
+    async function verificarPedidoAtivo() {
+      const pedSalvo = localStorage.getItem('ultimo_pedido_id');
+      if (!pedSalvo) {
+        document.getElementById('banner-acompanhar').classList.add('hidden');
+        return;
+      }
+
+      try {
+        let urlConsulta = `${API_URL}?v=status&pedido=${encodeURIComponent(pedSalvo)}`;
+        if (TOKEN_URL) urlConsulta += `&token=${encodeURIComponent(TOKEN_URL)}`;
+
+        const res = await fetch(urlConsulta);
+        const dados = await res.json();
+        if (dados && dados.encontrado) {
+          const st = (dados.status || "").toLowerCase();
+          if (st === "concluido" || st === "cancelado") {
+            localStorage.removeItem('ultimo_pedido_id');
+            document.getElementById('banner-acompanhar').classList.add('hidden');
+            return;
+          }
+        }
+        document.getElementById('banner-acompanhar').classList.remove('hidden');
+        document.getElementById('link-status-banner').href = `status.html?p=${encodeURIComponent(pedSalvo)}${TOKEN_URL ? '&token=' + encodeURIComponent(TOKEN_URL) : ''}`;
+      } catch (e) {
+        document.getElementById('banner-acompanhar').classList.remove('hidden');
+        document.getElementById('link-status-banner').href = `status.html?p=${encodeURIComponent(pedSalvo)}${TOKEN_URL ? '&token=' + encodeURIComponent(TOKEN_URL) : ''}`;
+      }
+    }
+
+    async function carregarProdutos() {
+      try {
+        let urlReq = API_URL;
+        if (TOKEN_URL) urlReq += `?token=${encodeURIComponent(TOKEN_URL)}`;
+
+        const res = await fetch(urlReq);
+        const data = await res.json();
+
+        if (TOKEN_URL && data && (data.bloqueado || data.erro)) {
+          document.body.innerHTML = `
+            <div class="min-h-screen flex items-center justify-center p-6 bg-slate-900 text-white text-center font-sans">
+              <div class="max-w-md w-full bg-slate-800 p-8 rounded-3xl border border-slate-700 shadow-2xl space-y-4">
+                <div class="w-16 h-16 bg-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center mx-auto text-3xl">⏳</div>
+                <h2 class="text-xl font-black tracking-tight text-white">Demonstração Bloqueada</h2>
+                <p class="text-xs text-slate-300 leading-relaxed">${data.mensagem || "Este acesso só estará disponível no horário agendado."}</p>
+                <div class="pt-2">
+                  <a href="https://pedejato.com.br" class="inline-block w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-red-600/30">Voltar para o Início</a>
+                </div>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        if (data.horarioInicio) {
+          aplicarStatusHorario(data.lojaAberta, data.horarioInicio, data.horarioFim);
+        }
+
+        produtos = data.produtos || (Array.isArray(data) ? data : []);
+        renderizarCardapio();
+      } catch (err) {
+        document.getElementById('catalogo').innerHTML = '<p class="text-red-500 text-center font-bold">Erro ao carregar cardápio.</p>';
+      }
+    }
+
+    function aplicarStatusHorario(aberta, inicio, fim) {
+      lojaAbertaStatus = (aberta === true);
+
+      const banner = document.getElementById('banner-horario');
+      const box = document.getElementById('banner-horario-conteudo');
+      const ponto = document.getElementById('ponto-status-horario');
+      const texto = document.getElementById('texto-status-horario');
+      const badge = document.getElementById('badge-horario-expediente');
+
+      banner.classList.remove('hidden');
+      badge.innerText = `${inicio || '18:00'} às ${fim || '23:30'}`;
+
+      if (lojaAbertaStatus) {
+        box.className = "p-3 rounded-2xl text-xs font-bold flex items-center justify-between shadow-sm bg-emerald-50 text-emerald-900 border border-emerald-200";
+        ponto.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+        texto.innerText = "Aberto para pedidos agora";
+      } else {
+        box.className = "p-3 rounded-2xl text-xs font-bold flex items-center justify-between shadow-sm bg-amber-50 text-amber-900 border border-amber-200";
+        ponto.className = "w-2.5 h-2.5 rounded-full bg-amber-500";
+        texto.innerText = "Fechado no momento";
+      }
+
+      atualizarBarra();
+    }
+
+    function toggleCategoria(categoria, estaAberto) {
+      if (estaAberto) categoriasAbertas.add(categoria);
+      else categoriasAbertas.delete(categoria);
+    }
+
+    function ehCategoriaPizza(cat) {
+      const c = (cat || "").toLowerCase();
+      return c === "pizza" || c === "pizzas";
+    }
+
+    // Processa a string de opcionais da planilha: "Bacon:4.00, Queijo:3.50"
+    function extrairOpcionaisDoProduto(strOpcionais) {
+      if (!strOpcionais || typeof strOpcionais !== "string") return [];
+      return strOpcionais.split(",")
+        .map(item => {
+          const partes = item.split(":");
+          if (partes.length >= 2) {
+            const nome = partes[0].trim();
+            const preco = parseFloat(partes[1].replace(",", "."));
+            if (nome && !isNaN(preco)) return { nome, preco };
+          }
+          return null;
+        })
+        .filter(opt => opt !== null);
+    }
+
+    // Clique no botão + do cardápio
+    function tratarCliqueAdicionar(idProduto) {
+      const p = produtos.find(item => item.id.toString() === idProduto.toString());
+      if (!p) return;
+
+      const opcionais = extrairOpcionaisDoProduto(p.opcionais);
+      // Se tiver opcionais cadastrados, abre o modal de seleção
+      if (opcionais.length > 0) {
+        abrirModalOpcionais(p, opcionais);
+      } else {
+        // Produto simples: soma direto no carrinho
+        alterarQtd(p.id.toString(), 1);
+      }
+    }
+
+    function abrirModalOpcionais(produto, listaOpcionais) {
+      produtoEmEdicaoOpcionais = produto;
+      document.getElementById('modal-opt-nome').innerText = produto.nome;
+      document.getElementById('modal-opt-preco-base').innerText = `R$ ${Number(produto.preco).toFixed(2)}`;
+      document.getElementById('modal-opt-img').src = produto.imagem || 'https://placehold.co/100';
+
+      const container = document.getElementById('modal-opt-lista');
+      container.innerHTML = "";
+
+      listaOpcionais.forEach((opt, idx) => {
+        const itemHtml = `
+          <label class="flex items-center justify-between p-3 rounded-xl border border-gray-200 bg-gray-50/70 hover:bg-gray-100 cursor-pointer transition-colors">
+            <div class="flex items-center gap-2.5">
+              <input type="checkbox" name="opt_check" value="${idx}" onchange="recalcularSubtotalModalOpcionais()" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+              <span class="text-xs font-bold text-gray-800">${opt.nome}</span>
+            </div>
+            <span class="text-xs font-extrabold text-green-700">+ R$ ${opt.preco.toFixed(2)}</span>
+          </label>
+        `;
+        container.innerHTML += itemHtml;
+      });
+
+      recalcularSubtotalModalOpcionais();
+      document.getElementById('modal-opcionais').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function fecharModalOpcionais() {
+      document.getElementById('modal-opcionais').classList.add('hidden');
+      produtoEmEdicaoOpcionais = null;
+    }
+
+    function recalcularSubtotalModalOpcionais() {
+      if (!produtoEmEdicaoOpcionais) return;
+      const precoBase = Number(produtoEmEdicaoOpcionais.preco);
+      const listaOpcionais = extrairOpcionaisDoProduto(produtoEmEdicaoOpcionais.opcionais);
+      
+      const checkboxes = document.querySelectorAll('input[name="opt_check"]:checked');
+      let totalOpt = 0;
+      checkboxes.forEach(cb => {
+        const idx = parseInt(cb.value, 10);
+        totalOpt += listaOpcionais[idx].preco;
+      });
+
+      const totalItem = precoBase + totalOpt;
+      document.getElementById('modal-opt-subtotal').innerText = `R$ ${totalItem.toFixed(2)}`;
+    }
+
+    function confirmarItemComOpcionais() {
+      if (!produtoEmEdicaoOpcionais) return;
+
+      const p = produtoEmEdicaoOpcionais;
+      const listaOpcionais = extrairOpcionaisDoProduto(p.opcionais);
+      const checkboxes = document.querySelectorAll('input[name="opt_check"]:checked');
+
+      const selecionados = [];
+      checkboxes.forEach(cb => {
+        const idx = parseInt(cb.value, 10);
+        selecionados.push(listaOpcionais[idx]);
+      });
+
+      // Se nenhum opcional foi marcado, adiciona como item normal
+      if (selecionados.length === 0) {
+        alterarQtd(p.id.toString(), 1);
+        fecharModalOpcionais();
+        return;
+      }
+
+      // Gera uma chave única combinando o produto e os adicionais escolhidos
+      const hashOpt = selecionados.map(o => o.nome.replace(/\s+/g, '')).sort().join('_');
+      const chaveItem = `opt_${p.id}_${hashOpt}`;
+
+      if (!carrinho[chaveItem]) {
+        carrinho[chaveItem] = {
+          tipo: "custom",
+          idProduto: p.id,
+          nomeBase: p.nome,
+          precoBase: Number(p.preco),
+          opcionais: selecionados,
+          qtd: 1
+        };
+      } else {
+        carrinho[chaveItem].qtd += 1;
+      }
+
+      fecharModalOpcionais();
+      renderizarCardapio();
+    }
+
+    function renderizarCardapio() {
+      const container = document.getElementById('catalogo');
+
+      const categorias = produtos.reduce((acc, p) => {
+        const cat = p.categoria || "Outros";
+        if (!acc[cat]) acc[cat] = [];
+        acc[cat].push(p);
+        return acc;
+      }, {});
+
+      let html = '';
+
+      for (const [categoria, itens] of Object.entries(categorias)) {
+        const isOpen = categoriasAbertas.has(categoria) ? 'open' : '';
+        const catEscapada = categoria.replace(/'/g, "\\'");
+        const isPizza = ehCategoriaPizza(categoria);
+
+        html += `
+          <details ${isOpen} ontoggle="toggleCategoria('${catEscapada}', this.open)" class="group mb-4 bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <summary class="flex justify-between items-center p-3.5 font-bold text-gray-800 cursor-pointer select-none bg-gray-50 hover:bg-gray-100 transition-colors list-none">
+              <div class="flex items-center gap-2">
+                <span class="w-1.5 h-5 bg-red-600 rounded-full"></span>
+                <span class="text-base font-extrabold">${categoria}</span>
+                <span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full font-bold">${itens.length}</span>
+              </div>
+              <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </summary>
+
+            <div class="p-3 space-y-3 border-t border-gray-100">
+              ${isPizza ? `
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center justify-between">
+                  <div>
+                    <h4 class="text-xs font-black text-amber-900">Quer montar Meio a Meio?</h4>
+                    <p class="text-[11px] text-amber-700">Escolha 2 sabores em 1 única pizza.</p>
+                  </div>
+                  <button onclick="abrirModalPizza()" class="bg-amber-600 hover:bg-amber-700 text-white font-black text-xs px-3 py-2 rounded-lg shadow active:scale-95 transition-all">
+                    Montar 1/2 a 1/2
+                  </button>
+                </div>
+              ` : ''}
+
+              ${itens.map(p => {
+                const temOpt = extrairOpcionaisDoProduto(p.opcionais).length > 0;
+                const qtdNormal = (typeof carrinho[p.id] === 'number') ? carrinho[p.id] : 0;
+
+                return `
+                  <div class="bg-white rounded-xl border border-gray-100 p-3 flex gap-3 items-center hover:border-gray-300 transition-colors">
+                    <img src="${p.imagem || 'https://placehold.co/100'}" class="w-20 h-20 object-cover rounded-xl bg-gray-50 flex-shrink-0">
+                    <div class="flex-1 min-w-0">
+                      <h3 class="font-extrabold text-gray-800 text-sm truncate">${p.nome}</h3>
+                      <p class="text-xs text-gray-400 line-clamp-2 mt-0.5 font-medium">${p.descricao}</p>
+                      ${temOpt ? `<span class="text-[10px] text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block mt-1">+ Opcionais disponíveis</span>` : ''}
+                      <span class="text-green-700 font-black text-sm block mt-1">R$ ${Number(p.preco).toFixed(2)}</span>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-xl border border-gray-200 flex-shrink-0">
+                      ${qtdNormal > 0 ? `
+                        <button onclick="alterarQtd('${p.id}', -1)" class="w-7 h-7 bg-red-100 text-red-600 rounded-lg font-black text-sm flex items-center justify-center active:scale-90 transition-transform">-</button>
+                        <span class="text-xs font-black text-gray-800 w-4 text-center">${qtdNormal}</span>
+                      ` : ''}
+                      <button onclick="tratarCliqueAdicionar('${p.id}')" class="w-7 h-7 bg-red-600 text-white rounded-lg font-black text-sm flex items-center justify-center active:scale-90 transition-transform">+</button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </details>
+        `;
+      }
+
+      // Bloco de Itens Customizados (Com Opcionais) no Carrinho
+      const itensCustom = Object.entries(carrinho).filter(([k, v]) => k.startsWith("opt_"));
+      if (itensCustom.length > 0) {
+        html += `
+          <div class="mb-4 bg-white rounded-2xl shadow-sm border border-red-200 p-3.5 space-y-2">
+            <h4 class="text-xs font-black uppercase text-red-700 flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-4 h-4"></i> Itens com Adicionais no Carrinho
+            </h4>
+            ${itensCustom.map(([chave, item]) => {
+              const valorUnit = item.precoBase + item.opcionais.reduce((s, o) => s + o.preco, 0);
+              const txtAdicionais = item.opcionais.map(o => `+ ${o.nome}`).join(', ');
+
+              return `
+                <div class="flex justify-between items-center bg-red-50/50 p-2.5 rounded-xl text-xs border border-red-100">
+                  <div class="flex-1 pr-2">
+                    <p class="font-bold text-gray-800">${item.nomeBase}</p>
+                    <p class="text-[11px] text-gray-500 font-semibold">${txtAdicionais}</p>
+                    <span class="text-green-700 font-black">R$ ${valorUnit.toFixed(2)} un.</span>
+                  </div>
+                  <div class="flex items-center gap-2 bg-white p-1 rounded-lg border border-red-200">
+                    <button onclick="alterarQtd('${chave}', -1)" class="w-6 h-6 bg-red-100 text-red-600 rounded font-bold">-</button>
+                    <span class="text-xs font-bold w-4 text-center">${item.qtd}</span>
+                    <button onclick="alterarQtd('${chave}', 1)" class="w-6 h-6 bg-red-600 text-white rounded font-bold">+</button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      // Bloco de Pizzas Meio a Meio
+      const pizzasMeio = Object.entries(carrinho).filter(([k]) => k.startsWith("meio_"));
+      if (pizzasMeio.length > 0) {
+        html += `
+          <div class="mb-4 bg-white rounded-2xl shadow-sm border border-amber-200 p-3.5 space-y-2">
+            <h4 class="text-xs font-black uppercase text-amber-800 flex items-center gap-1.5">
+              <i data-lucide="pie-chart" class="w-4 h-4"></i> Pizzas Meio a Meio no Carrinho
+            </h4>
+            ${pizzasMeio.map(([chave, qtd]) => {
+              const dados = obterDadosItemCarrinho(chave);
+              return `
+                <div class="flex justify-between items-center bg-amber-50 p-2.5 rounded-xl text-xs border border-amber-100">
+                  <div class="flex-1 pr-2">
+                    <p class="font-bold text-gray-800">${dados.nome}</p>
+                    <span class="text-green-700 font-black">R$ ${Number(dados.preco).toFixed(2)} un.</span>
+                  </div>
+                  <div class="flex items-center gap-2 bg-white p-1 rounded-lg border border-amber-200">
+                    <button onclick="alterarQtd('${chave}', -1)" class="w-6 h-6 bg-red-100 text-red-600 rounded font-bold">-</button>
+                    <span class="text-xs font-bold w-4 text-center">${qtd}</span>
+                    <button onclick="alterarQtd('${chave}', 1)" class="w-6 h-6 bg-red-600 text-white rounded font-bold">+</button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+      atualizarBarra();
+      lucide.createIcons();
+    }
+
+    function abrirModalPizza() {
+      const pizzasDisponiveis = produtos.filter(p => ehCategoriaPizza(p.categoria));
+      if (pizzasDisponiveis.length < 2) {
+        alert("É necessário ter pelo menos 2 sabores de pizza cadastrados para montar meio a meio.");
+        return;
+      }
+
+      const sel1 = document.getElementById('pizza-sabor-1');
+      const sel2 = document.getElementById('pizza-sabor-2');
+      sel1.innerHTML = "";
+      sel2.innerHTML = "";
+
+      pizzasDisponiveis.forEach((pz, idx) => {
+        const opt1 = document.createElement('option');
+        opt1.value = pz.id;
+        opt1.text = `${pz.nome} (R$ ${Number(pz.preco).toFixed(2)})`;
+        sel1.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = pz.id;
+        opt2.text = `${pz.nome} (R$ ${Number(pz.preco).toFixed(2)})`;
+        if (idx === 1) opt2.selected = true;
+        sel2.appendChild(opt2);
+      });
+
+      atualizarPrecoPizzaModal();
+      document.getElementById('modal-pizza').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function fecharModalPizza() {
+      document.getElementById('modal-pizza').classList.add('hidden');
+    }
+
+    function atualizarPrecoPizzaModal() {
+      const id1 = document.getElementById('pizza-sabor-1').value;
+      const id2 = document.getElementById('pizza-sabor-2').value;
+      const p1 = produtos.find(p => p.id == id1);
+      const p2 = produtos.find(p => p.id == id2);
+      const precoFinal = Math.max(Number(p1 ? p1.preco : 0), Number(p2 ? p2.preco : 0));
+      document.getElementById('pizza-modal-preco').innerText = `R$ ${precoFinal.toFixed(2)}`;
+    }
+
+    function confirmarPizzaMeioAMeio() {
+      const id1 = document.getElementById('pizza-sabor-1').value;
+      const id2 = document.getElementById('pizza-sabor-2').value;
+      const chave = id1 <= id2 ? `meio_${id1}_${id2}` : `meio_${id2}_${id1}`;
+
+      carrinho[chave] = (carrinho[chave] || 0) + 1;
+      fecharModalPizza();
+      renderizarCardapio();
+    }
+
+    function obterDadosItemCarrinho(chave) {
+      if (chave.startsWith("meio_")) {
+        const partes = chave.split("_");
+        const p1 = produtos.find(p => p.id == partes[1]);
+        const p2 = produtos.find(p => p.id == partes[2]);
+        const nome1 = p1 ? p1.nome.replace(/pizza/i, "").trim() : "Sabor 1";
+        const nome2 = p2 ? p2.nome.replace(/pizza/i, "").trim() : "Sabor 2";
+        const preco = Math.max(Number(p1 ? p1.preco : 0), Number(p2 ? p2.preco : 0));
+        return { nome: `Pizza 1/2 ${nome1} + 1/2 ${nome2}`, preco: preco };
+      } else if (chave.startsWith("opt_")) {
+        const item = carrinho[chave];
+        const valorUnit = item.precoBase + item.opcionais.reduce((s, o) => s + o.preco, 0);
+        return {
+          nome: item.nomeBase,
+          preco: valorUnit,
+          opcionais: item.opcionais
+        };
+      } else {
+        const p = produtos.find(p => p.id == chave);
+        return {
+          nome: p ? p.nome : "Item",
+          preco: p ? Number(p.preco) : 0
+        };
+      }
+    }
+
+    function alterarQtd(chave, delta) {
+      if (chave.startsWith("opt_")) {
+        if (!carrinho[chave]) return;
+        const novaQtd = carrinho[chave].qtd + delta;
+        if (novaQtd > 0) carrinho[chave].qtd = novaQtd;
+        else delete carrinho[chave];
+      } else {
+        const atual = carrinho[chave] || 0;
+        const novaQtd = atual + delta;
+        if (novaQtd > 0) carrinho[chave] = novaQtd;
+        else delete carrinho[chave];
+      }
+      renderizarCardapio();
+    }
+
+    function obterTotalCarrinho() {
+      let total = 0;
+      for (const [chave, val] of Object.entries(carrinho)) {
+        if (chave.startsWith("opt_")) {
+          const item = val;
+          const unit = item.precoBase + item.opcionais.reduce((s, o) => s + o.preco, 0);
+          total += unit * item.qtd;
+        } else {
+          const item = obterDadosItemCarrinho(chave);
+          total += item.preco * val;
+        }
+      }
+      return total;
+    }
+
+    function atualizarBarra() {
+      const total = obterTotalCarrinho();
+      const totalFormatado = `R$ ${total.toFixed(2)}`;
+      document.getElementById('total-carrinho').innerText = totalFormatado;
+      document.getElementById('chk-total-modal').innerText = totalFormatado;
+
+      const footer = document.getElementById('footer-carrinho');
+      const btnAvancar = document.getElementById('btn-avancar-carrinho');
+      const labelBtn = document.getElementById('label-btn-carrinho');
+
+      if (total > 0) {
+        footer.classList.remove('hidden');
+
+        if (!lojaAbertaStatus) {
+          btnAvancar.disabled = true;
+          btnAvancar.className = "bg-gray-400 text-white font-bold py-2.5 px-6 rounded-xl shadow cursor-not-allowed flex items-center gap-2";
+          labelBtn.innerText = "Fechado no momento";
+        } else {
+          btnAvancar.disabled = false;
+          btnAvancar.className = "bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 rounded-xl shadow active:scale-95 transition-all flex items-center gap-2";
+          labelBtn.innerText = "Avançar Pedido";
+        }
+      } else {
+        footer.classList.add('hidden');
+      }
+    }
+
+    function abrirModalCheckout() {
+      if (!lojaAbertaStatus) {
+        alert("O estabelecimento está fechado para pedidos no momento.");
+        return;
+      }
+      document.getElementById('modal-checkout').classList.remove('hidden');
+      alternarTipoEntrega();
+      lucide.createIcons();
+    }
+
+    function fecharModalCheckout() {
+      document.getElementById('modal-checkout').classList.add('hidden');
+    }
+
+    function alternarTipoEntrega() {
+      const tipo = document.querySelector('input[name="tipo_entrega"]:checked').value;
+      const boxEndereco = document.getElementById('box-endereco');
+      const inputEndereco = document.getElementById('chk-endereco');
+      const boxPagamento = document.getElementById('box-pagamento-completo');
+      const boxAvisoRetirada = document.getElementById('box-aviso-retirada');
+
+      if (tipo === 'retirada') {
+        boxEndereco.classList.add('hidden');
+        inputEndereco.removeAttribute('required');
+        inputEndereco.value = "";
+        boxPagamento.classList.add('hidden');
+        boxAvisoRetirada.classList.remove('hidden');
+      } else {
+        boxEndereco.classList.remove('hidden');
+        inputEndereco.setAttribute('required', 'true');
+        boxPagamento.classList.remove('hidden');
+        boxAvisoRetirada.classList.add('hidden');
+        alternarFormaPagamento();
+      }
+    }
+
+    function alternarFormaPagamento() {
+      const checkedPgto = document.querySelector('input[name="forma_pagamento"]:checked');
+      const forma = checkedPgto ? checkedPgto.value : "Pix";
+      const boxTroco = document.getElementById('box-troco');
+      if (forma === 'Dinheiro') {
+        boxTroco.classList.remove('hidden');
+      } else {
+        boxTroco.classList.add('hidden');
+      }
+    }
+
+    async function enviarPedido(event) {
+      event.preventDefault();
+
+      if (!lojaAbertaStatus) {
+        alert("O estabelecimento está fechado para pedidos no momento.");
+        return;
+      }
+
+      const btn = document.getElementById('btn-confirmar-pedido');
+      btn.innerText = "Processando Pedido...";
+      btn.disabled = true;
+
+      const nome = document.getElementById('chk-nome').value.trim();
+      const tipo = document.querySelector('input[name="tipo_entrega"]:checked').value;
+      const endereco = tipo === 'retirada' ? "🥡 Retirada no Balcão" : document.getElementById('chk-endereco').value.trim();
+      
+      let formaPgto = "Acerto no Balcão";
+      let troco = "";
+
+      if (tipo === 'delivery') {
+        const checkedPgto = document.querySelector('input[name="forma_pagamento"]:checked');
+        formaPgto = checkedPgto ? checkedPgto.value : "Pix";
+        troco = formaPgto === 'Dinheiro' ? document.getElementById('chk-troco').value.trim() : "";
+      }
+
+      const obs = document.getElementById('chk-observacao').value.trim();
+
+      let total = 0;
+      const linhasItens = [];
+
+      for (const [chave, val] of Object.entries(carrinho)) {
+        if (chave.startsWith("opt_")) {
+          const item = val;
+          const unit = item.precoBase + item.opcionais.reduce((s, o) => s + o.preco, 0);
+          total += unit * item.qtd;
+
+          linhasItens.push(`• ${item.qtd}x ${item.nomeBase}`);
+          item.opcionais.forEach(o => {
+            linhasItens.push(`  + ${o.nome} (R$ ${o.preco.toFixed(2)})`);
+          });
+        } else {
+          const item = obterDadosItemCarrinho(chave);
+          total += item.preco * val;
+          linhasItens.push(`• ${val}x ${item.nome}`);
+        }
+      }
+
+      const totalFormatado = `R$ ${total.toFixed(2)}`;
+      const itensFormatados = linhasItens.join('\n');
+      const idTemp = "#" + Math.floor(1000 + Math.random() * 9000);
+
+      try {
+        const payload = JSON.stringify({
+          pedido: idTemp,
+          cliente: nome,
+          itens: itensFormatados,
+          total: totalFormatado,
+          endereco: endereco,
+          pagamento: formaPgto,
+          trocoPara: troco,
+          tipoEntrega: tipo,
+          observacao: obs,
+          token: TOKEN_URL
+        });
+
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: payload
+        });
+
+        const resposta = await res.json();
+
+        if (resposta && resposta.status === "erro") {
+          alert(resposta.message || "Não foi possível registrar o pedido no momento.");
+          btn.innerText = "Confirmar Pedido";
+          btn.disabled = false;
+          return;
+        }
+
+        const idFinal = (resposta && resposta.pedido) ? resposta.pedido : idTemp;
+
+        localStorage.setItem('ultimo_pedido_id', idFinal);
+        carrinho = {};
+
+        const redirectUrl = `status.html?p=${encodeURIComponent(idFinal)}${TOKEN_URL ? '&token=' + encodeURIComponent(TOKEN_URL) : ''}`;
+        window.location.href = redirectUrl;
+
+      } catch (err) {
+        console.error("Erro ao processar pedido:", err);
+        alert("Erro de conexão ao enviar o pedido. Tente novamente.");
+        btn.innerText = "Confirmar Pedido";
+        btn.disabled = false;
+      }
+    }
+
+    verificarPedidoAtivo();
+    carregarProdutos();
   </script>
 </body>
 
