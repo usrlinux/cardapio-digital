@@ -17,7 +17,7 @@
     <p class="text-xs text-red-100 font-medium">Faça seu pedido online sem taxas</p>
   </header>
 
-  <!-- Banner de Horário de Funcionamento (Aberto vs Fechado) -->
+  <!-- Banner de Horário de Funcionamento -->
   <div id="banner-horario" class="max-w-md mx-auto px-4 pt-3 hidden">
     <div id="banner-horario-conteudo" class="p-3 rounded-2xl text-xs font-bold flex items-center justify-between shadow-sm">
       <div class="flex items-center gap-2">
@@ -52,6 +52,36 @@
     <button id="btn-avancar-carrinho" onclick="abrirModalCheckout()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 rounded-xl shadow active:scale-95 transition-all flex items-center gap-2">
       <i data-lucide="shopping-bag" class="w-4 h-4"></i> <span id="label-btn-carrinho">Avançar Pedido</span>
     </button>
+  </div>
+
+  <!-- MODAL DE ESCOLHA DE OPCIONAIS / ADICIONAIS -->
+  <div id="modal-opcionais" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-end sm:items-center justify-center hidden p-0 sm:p-4">
+    <div class="bg-white rounded-t-3xl sm:rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+      <div class="flex justify-between items-start border-b pb-3">
+        <div class="flex gap-3 items-center">
+          <img id="modal-opt-img" src="" class="w-12 h-12 rounded-xl object-cover bg-gray-100">
+          <div>
+            <h3 id="modal-opt-nome" class="text-base font-black text-gray-900 leading-tight">Nome do Produto</h3>
+            <span id="modal-opt-preco-base" class="text-xs font-bold text-gray-500">R$ 0,00</span>
+          </div>
+        </div>
+        <button type="button" onclick="fecharModalOpcionais()" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto space-y-2 pr-1">
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Deseja adicionar complementos?</p>
+        <div id="modal-opt-lista" class="space-y-2 pt-1"></div>
+      </div>
+
+      <div class="pt-2 border-t space-y-3">
+        <button onclick="confirmarItemComOpcionais()" id="btn-confirmar-opcionais" class="w-full bg-red-600 hover:bg-red-700 text-white font-black py-3 rounded-xl text-sm shadow active:scale-95 transition-all flex justify-between px-4 items-center">
+          <span>Adicionar ao Carrinho</span>
+          <span id="modal-opt-subtotal">R$ 0,00</span>
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL DE PIZZA MEIO A MEIO -->
@@ -89,7 +119,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE CHECKOUT ELEGANTE (UI/UX NATIVA) -->
+  <!-- MODAL DE CHECKOUT ELEGANTE -->
   <div id="modal-checkout" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-end sm:items-center justify-center hidden p-0 sm:p-4 transition-all">
     <div class="bg-white rounded-t-3xl sm:rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
       <div class="flex justify-between items-center border-b pb-3">
@@ -127,16 +157,16 @@
         <!-- Nome do Cliente -->
         <div>
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Seu Nome</label>
-          <input type="text" id="chk-nome" required placeholder="Ex: João Silva" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600">
+          <input type="text" id="chk-nome" required placeholder="Ex: João Silva" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600 font-medium">
         </div>
 
-        <!-- Bloco de Endereço (Apenas se for Delivery) -->
+        <!-- Bloco de Endereço -->
         <div id="box-endereco">
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Endereço de Entrega</label>
-          <input type="text" id="chk-endereco" placeholder="Rua, Número, Bairro e Complemento" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600">
+          <input type="text" id="chk-endereco" placeholder="Rua, Número, Bairro e Complemento" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600 font-medium">
         </div>
 
-        <!-- Bloco de Forma de Pagamento (Apenas se for Delivery) -->
+        <!-- Bloco de Pagamento -->
         <div id="box-pagamento-completo">
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1.5">Forma de Pagamento na Entrega</label>
           <div class="grid grid-cols-2 gap-2">
@@ -166,26 +196,22 @@
             </label>
           </div>
 
-          <!-- Campo Dinâmico de Troco -->
           <div id="box-troco" class="hidden mt-3">
             <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Precisa de troco para quanto?</label>
-            <input type="text" id="chk-troco" placeholder="Ex: R$ 50,00 ou Não preciso" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600">
+            <input type="text" id="chk-troco" placeholder="Ex: R$ 50,00 ou Não preciso" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600 font-medium">
           </div>
         </div>
 
-        <!-- Aviso para Retirada no Balcão -->
         <div id="box-aviso-retirada" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900">
           <p class="font-bold">🥡 Pagamento direto no balcão da loja.</p>
           <p class="text-[11px] text-amber-700 mt-0.5">Você efetua o pagamento no momento em que for retirar o seu pedido.</p>
         </div>
 
-        <!-- Campo de Observação -->
         <div>
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Observações do Pedido (Opcional)</label>
-          <textarea id="chk-observacao" rows="2" placeholder="Ex: Sem cebola, molho à parte..." class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600"></textarea>
+          <textarea id="chk-observacao" rows="2" placeholder="Ex: Sem cebola, molho à parte..." class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm focus:outline-none focus:border-red-600 font-medium"></textarea>
         </div>
 
-        <!-- Resumo de Total e Botão Final -->
         <div class="border-t pt-3 flex items-center justify-between">
           <div>
             <span class="text-xs text-gray-400 block font-bold">Total a pagar:</span>
@@ -200,15 +226,17 @@
   </div>
 
   <script>
+    // URL da API de Stage
     const API_URL = "https://script.google.com/macros/s/AKfycbykOqhw8JkNGZDij3pz_1wbfAi7_BJ7DfRymREfIkrRKnKp9We7CiVydj41z3ff3qdB/exec";
 
     const urlParams = new URLSearchParams(window.location.search);
     const TOKEN_URL = (urlParams.get('token') || '').trim();
 
     let produtos = [];
-    let carrinho = {};
+    let carrinho = {}; // Chaves: 'id_normal', 'meio_id1_id2', 'opt_id_hash'
     const categoriasAbertas = new Set();
     let lojaAbertaStatus = true;
+    let produtoEmEdicaoOpcionais = null;
 
     async function verificarPedidoAtivo() {
       const pedSalvo = localStorage.getItem('ultimo_pedido_id');
@@ -219,9 +247,7 @@
 
       try {
         let urlConsulta = `${API_URL}?v=status&pedido=${encodeURIComponent(pedSalvo)}`;
-        if (TOKEN_URL) {
-          urlConsulta += `&token=${encodeURIComponent(TOKEN_URL)}`;
-        }
+        if (TOKEN_URL) urlConsulta += `&token=${encodeURIComponent(TOKEN_URL)}`;
 
         const res = await fetch(urlConsulta);
         const dados = await res.json();
@@ -244,14 +270,11 @@
     async function carregarProdutos() {
       try {
         let urlReq = API_URL;
-        if (TOKEN_URL) {
-          urlReq += `?token=${encodeURIComponent(TOKEN_URL)}`;
-        }
+        if (TOKEN_URL) urlReq += `?token=${encodeURIComponent(TOKEN_URL)}`;
 
         const res = await fetch(urlReq);
         const data = await res.json();
 
-        // Bloqueio de horário agendado de demonstração (APENAS se houver TOKEN_URL)
         if (TOKEN_URL && data && (data.bloqueado || data.erro)) {
           document.body.innerHTML = `
             <div class="min-h-screen flex items-center justify-center p-6 bg-slate-900 text-white text-center font-sans">
@@ -268,7 +291,9 @@
           return;
         }
 
-        aplicarStatusHorario(data.lojaAberta, data.horarioInicio, data.horarioFim);
+        if (data.horarioInicio) {
+          aplicarStatusHorario(data.lojaAberta, data.horarioInicio, data.horarioFim);
+        }
 
         produtos = data.produtos || (Array.isArray(data) ? data : []);
         renderizarCardapio();
@@ -278,7 +303,6 @@
     }
 
     function aplicarStatusHorario(aberta, inicio, fim) {
-      // Exige true estrito para evitar falsos positivos
       lojaAbertaStatus = (aberta === true);
 
       const banner = document.getElementById('banner-horario');
@@ -311,6 +335,126 @@
     function ehCategoriaPizza(cat) {
       const c = (cat || "").toLowerCase();
       return c === "pizza" || c === "pizzas";
+    }
+
+    // Processa a string de opcionais da planilha: "Bacon:4.00, Queijo:3.50"
+    function extrairOpcionaisDoProduto(strOpcionais) {
+      if (!strOpcionais || typeof strOpcionais !== "string") return [];
+      return strOpcionais.split(",")
+        .map(item => {
+          const partes = item.split(":");
+          if (partes.length >= 2) {
+            const nome = partes[0].trim();
+            const preco = parseFloat(partes[1].replace(",", "."));
+            if (nome && !isNaN(preco)) return { nome, preco };
+          }
+          return null;
+        })
+        .filter(opt => opt !== null);
+    }
+
+    // Clique no botão + do cardápio
+    function tratarCliqueAdicionar(idProduto) {
+      const p = produtos.find(item => item.id.toString() === idProduto.toString());
+      if (!p) return;
+
+      const opcionais = extrairOpcionaisDoProduto(p.opcionais);
+      // Se tiver opcionais cadastrados, abre o modal de seleção
+      if (opcionais.length > 0) {
+        abrirModalOpcionais(p, opcionais);
+      } else {
+        // Produto simples: soma direto no carrinho
+        alterarQtd(p.id.toString(), 1);
+      }
+    }
+
+    function abrirModalOpcionais(produto, listaOpcionais) {
+      produtoEmEdicaoOpcionais = produto;
+      document.getElementById('modal-opt-nome').innerText = produto.nome;
+      document.getElementById('modal-opt-preco-base').innerText = `R$ ${Number(produto.preco).toFixed(2)}`;
+      document.getElementById('modal-opt-img').src = produto.imagem || 'https://placehold.co/100';
+
+      const container = document.getElementById('modal-opt-lista');
+      container.innerHTML = "";
+
+      listaOpcionais.forEach((opt, idx) => {
+        const itemHtml = `
+          <label class="flex items-center justify-between p-3 rounded-xl border border-gray-200 bg-gray-50/70 hover:bg-gray-100 cursor-pointer transition-colors">
+            <div class="flex items-center gap-2.5">
+              <input type="checkbox" name="opt_check" value="${idx}" onchange="recalcularSubtotalModalOpcionais()" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+              <span class="text-xs font-bold text-gray-800">${opt.nome}</span>
+            </div>
+            <span class="text-xs font-extrabold text-green-700">+ R$ ${opt.preco.toFixed(2)}</span>
+          </label>
+        `;
+        container.innerHTML += itemHtml;
+      });
+
+      recalcularSubtotalModalOpcionais();
+      document.getElementById('modal-opcionais').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function fecharModalOpcionais() {
+      document.getElementById('modal-opcionais').classList.add('hidden');
+      produtoEmEdicaoOpcionais = null;
+    }
+
+    function recalcularSubtotalModalOpcionais() {
+      if (!produtoEmEdicaoOpcionais) return;
+      const precoBase = Number(produtoEmEdicaoOpcionais.preco);
+      const listaOpcionais = extrairOpcionaisDoProduto(produtoEmEdicaoOpcionais.opcionais);
+      
+      const checkboxes = document.querySelectorAll('input[name="opt_check"]:checked');
+      let totalOpt = 0;
+      checkboxes.forEach(cb => {
+        const idx = parseInt(cb.value, 10);
+        totalOpt += listaOpcionais[idx].preco;
+      });
+
+      const totalItem = precoBase + totalOpt;
+      document.getElementById('modal-opt-subtotal').innerText = `R$ ${totalItem.toFixed(2)}`;
+    }
+
+    function confirmarItemComOpcionais() {
+      if (!produtoEmEdicaoOpcionais) return;
+
+      const p = produtoEmEdicaoOpcionais;
+      const listaOpcionais = extrairOpcionaisDoProduto(p.opcionais);
+      const checkboxes = document.querySelectorAll('input[name="opt_check"]:checked');
+
+      const selecionados = [];
+      checkboxes.forEach(cb => {
+        const idx = parseInt(cb.value, 10);
+        selecionados.push(listaOpcionais[idx]);
+      });
+
+      // Se nenhum opcional foi marcado, adiciona como item normal
+      if (selecionados.length === 0) {
+        alterarQtd(p.id.toString(), 1);
+        fecharModalOpcionais();
+        return;
+      }
+
+      // Gera uma chave única combinando o produto e os adicionais escolhidos
+      const hashOpt = selecionados.map(o => o.nome.replace(/\s+/g, '')).sort().join('_');
+      const chaveItem = `opt_${p.id}_${hashOpt}`;
+
+      if (!carrinho[chaveItem]) {
+        carrinho[chaveItem] = {
+          tipo: "custom",
+          idProduto: p.id,
+          nomeBase: p.nome,
+          precoBase: Number(p.preco),
+          opcionais: selecionados,
+          qtd: 1
+        };
+      } else {
+        carrinho[chaveItem].qtd += 1;
+      }
+
+      fecharModalOpcionais();
+      renderizarCardapio();
     }
 
     function renderizarCardapio() {
@@ -357,22 +501,25 @@
               ` : ''}
 
               ${itens.map(p => {
-                const qtd = carrinho[p.id] || 0;
+                const temOpt = extrairOpcionaisDoProduto(p.opcionais).length > 0;
+                const qtdNormal = (typeof carrinho[p.id] === 'number') ? carrinho[p.id] : 0;
+
                 return `
                   <div class="bg-white rounded-xl border border-gray-100 p-3 flex gap-3 items-center hover:border-gray-300 transition-colors">
                     <img src="${p.imagem || 'https://placehold.co/100'}" class="w-20 h-20 object-cover rounded-xl bg-gray-50 flex-shrink-0">
                     <div class="flex-1 min-w-0">
                       <h3 class="font-extrabold text-gray-800 text-sm truncate">${p.nome}</h3>
                       <p class="text-xs text-gray-400 line-clamp-2 mt-0.5 font-medium">${p.descricao}</p>
+                      ${temOpt ? `<span class="text-[10px] text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block mt-1">+ Opcionais disponíveis</span>` : ''}
                       <span class="text-green-700 font-black text-sm block mt-1">R$ ${Number(p.preco).toFixed(2)}</span>
                     </div>
                     
                     <div class="flex items-center gap-2 bg-gray-50 p-1 rounded-xl border border-gray-200 flex-shrink-0">
-                      ${qtd > 0 ? `
+                      ${qtdNormal > 0 ? `
                         <button onclick="alterarQtd('${p.id}', -1)" class="w-7 h-7 bg-red-100 text-red-600 rounded-lg font-black text-sm flex items-center justify-center active:scale-90 transition-transform">-</button>
-                        <span class="text-xs font-black text-gray-800 w-4 text-center">${qtd}</span>
+                        <span class="text-xs font-black text-gray-800 w-4 text-center">${qtdNormal}</span>
                       ` : ''}
-                      <button onclick="alterarQtd('${p.id}', 1)" class="w-7 h-7 bg-red-600 text-white rounded-lg font-black text-sm flex items-center justify-center active:scale-90 transition-transform">+</button>
+                      <button onclick="tratarCliqueAdicionar('${p.id}')" class="w-7 h-7 bg-red-600 text-white rounded-lg font-black text-sm flex items-center justify-center active:scale-90 transition-transform">+</button>
                     </div>
                   </div>
                 `;
@@ -382,6 +529,38 @@
         `;
       }
 
+      // Bloco de Itens Customizados (Com Opcionais) no Carrinho
+      const itensCustom = Object.entries(carrinho).filter(([k, v]) => k.startsWith("opt_"));
+      if (itensCustom.length > 0) {
+        html += `
+          <div class="mb-4 bg-white rounded-2xl shadow-sm border border-red-200 p-3.5 space-y-2">
+            <h4 class="text-xs font-black uppercase text-red-700 flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-4 h-4"></i> Itens com Adicionais no Carrinho
+            </h4>
+            ${itensCustom.map(([chave, item]) => {
+              const valorUnit = item.precoBase + item.opcionais.reduce((s, o) => s + o.preco, 0);
+              const txtAdicionais = item.opcionais.map(o => `+ ${o.nome}`).join(', ');
+
+              return `
+                <div class="flex justify-between items-center bg-red-50/50 p-2.5 rounded-xl text-xs border border-red-100">
+                  <div class="flex-1 pr-2">
+                    <p class="font-bold text-gray-800">${item.nomeBase}</p>
+                    <p class="text-[11px] text-gray-500 font-semibold">${txtAdicionais}</p>
+                    <span class="text-green-700 font-black">R$ ${valorUnit.toFixed(2)} un.</span>
+                  </div>
+                  <div class="flex items-center gap-2 bg-white p-1 rounded-lg border border-red-200">
+                    <button onclick="alterarQtd('${chave}', -1)" class="w-6 h-6 bg-red-100 text-red-600 rounded font-bold">-</button>
+                    <span class="text-xs font-bold w-4 text-center">${item.qtd}</span>
+                    <button onclick="alterarQtd('${chave}', 1)" class="w-6 h-6 bg-red-600 text-white rounded font-bold">+</button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      // Bloco de Pizzas Meio a Meio
       const pizzasMeio = Object.entries(carrinho).filter(([k]) => k.startsWith("meio_"));
       if (pizzasMeio.length > 0) {
         html += `
@@ -475,9 +654,14 @@
         const nome1 = p1 ? p1.nome.replace(/pizza/i, "").trim() : "Sabor 1";
         const nome2 = p2 ? p2.nome.replace(/pizza/i, "").trim() : "Sabor 2";
         const preco = Math.max(Number(p1 ? p1.preco : 0), Number(p2 ? p2.preco : 0));
+        return { nome: `Pizza 1/2 ${nome1} + 1/2 ${nome2}`, preco: preco };
+      } else if (chave.startsWith("opt_")) {
+        const item = carrinho[chave];
+        const valorUnit = item.precoBase + item.opcionais.reduce((s, o) => s + o.preco, 0);
         return {
-          nome: `Pizza 1/2 ${nome1} + 1/2 ${nome2}`,
-          preco: preco
+          nome: item.nomeBase,
+          preco: valorUnit,
+          opcionais: item.opcionais
         };
       } else {
         const p = produtos.find(p => p.id == chave);
@@ -489,18 +673,31 @@
     }
 
     function alterarQtd(chave, delta) {
-      const atual = carrinho[chave] || 0;
-      const novaQtd = atual + delta;
-      if (novaQtd > 0) carrinho[chave] = novaQtd;
-      else delete carrinho[chave];
+      if (chave.startsWith("opt_")) {
+        if (!carrinho[chave]) return;
+        const novaQtd = carrinho[chave].qtd + delta;
+        if (novaQtd > 0) carrinho[chave].qtd = novaQtd;
+        else delete carrinho[chave];
+      } else {
+        const atual = carrinho[chave] || 0;
+        const novaQtd = atual + delta;
+        if (novaQtd > 0) carrinho[chave] = novaQtd;
+        else delete carrinho[chave];
+      }
       renderizarCardapio();
     }
 
     function obterTotalCarrinho() {
       let total = 0;
-      for (const [chave, qtd] of Object.entries(carrinho)) {
-        const item = obterDadosItemCarrinho(chave);
-        total += item.preco * qtd;
+      for (const [chave, val] of Object.entries(carrinho)) {
+        if (chave.startsWith("opt_")) {
+          const item = val;
+          const unit = item.precoBase + item.opcionais.reduce((s, o) => s + o.preco, 0);
+          total += unit * item.qtd;
+        } else {
+          const item = obterDadosItemCarrinho(chave);
+          total += item.preco * val;
+        }
       }
       return total;
     }
@@ -608,10 +805,22 @@
 
       let total = 0;
       const linhasItens = [];
-      for (const [chave, qtd] of Object.entries(carrinho)) {
-        const item = obterDadosItemCarrinho(chave);
-        linhasItens.push(`• ${qtd}x ${item.nome}`);
-        total += item.preco * qtd;
+
+      for (const [chave, val] of Object.entries(carrinho)) {
+        if (chave.startsWith("opt_")) {
+          const item = val;
+          const unit = item.precoBase + item.opcionais.reduce((s, o) => s + o.preco, 0);
+          total += unit * item.qtd;
+
+          linhasItens.push(`• ${item.qtd}x ${item.nomeBase}`);
+          item.opcionais.forEach(o => {
+            linhasItens.push(`  + ${o.nome} (R$ ${o.preco.toFixed(2)})`);
+          });
+        } else {
+          const item = obterDadosItemCarrinho(chave);
+          total += item.preco * val;
+          linhasItens.push(`• ${val}x ${item.nome}`);
+        }
       }
 
       const totalFormatado = `R$ ${total.toFixed(2)}`;
