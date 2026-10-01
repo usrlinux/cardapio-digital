@@ -14,7 +14,7 @@
   <!-- Header Fixo -->
   <header class="bg-red-600 text-white p-4 sticky top-0 z-20 shadow flex items-center justify-between">
     <div class="flex items-center gap-2">
-      <a href="index.html" class="p-1 rounded-lg hover:bg-red-700 transition">
+      <a href="index-desenvolvedor.html" class="p-1 rounded-lg hover:bg-red-700 transition">
         <i data-lucide="arrow-left" class="w-6 h-6"></i>
       </a>
       <h1 class="text-base font-extrabold tracking-wide">Status do Pedido</h1>
@@ -136,6 +136,7 @@
     let hashPedido = urlParams.get('h') || localStorage.getItem('ultimo_pedido_hash') || '';
     const tokenUrl = urlParams.get('token') || '';
 
+    // Se o hash veio na URL, sincroniza com o localStorage
     if (urlParams.get('h')) {
       localStorage.setItem('ultimo_pedido_hash', urlParams.get('h'));
     }
